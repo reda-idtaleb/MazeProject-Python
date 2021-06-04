@@ -10,6 +10,7 @@
 
 # How to execute the programm
 On your terminal, run the command to run the program:
-`` bash
-do exe
-`` ``
+
+``` bash
+make exe
+```
