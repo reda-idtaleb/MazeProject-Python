@@ -12,5 +12,5 @@
 On your terminal, run the command to run the program:
 
 ``` bash
-make exe
+$ make exe
 ```
