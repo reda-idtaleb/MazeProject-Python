@@ -363,7 +363,13 @@ class Labyrinthe():
         a.write("\n\n")
         a.write("Vous pouvez réflichir avant de regarder la solution, ne trichez pas ;)!\n\n Sinon, la résolution de ce labyrinthe est:\n "+ str(self.find_a_way()))
         a.close()
-            
+
+def verify_filename(s):
+    if ".txt" in s:
+        return s
+    else:
+        return s + ".txt" 
+    
 def main():
     try:
         choice = int(input("-> Enter '1' if you want to generate a maze and solve it\n" +
@@ -372,13 +378,13 @@ def main():
                            "My choice: "))
         print("\n")
         if choice == 1:
-            file = input("** Please choose a name for your file. ( Veuillez entrez un nom pour votre fichier.)\n** Le type du fichier adopté, est le type (.txt).\n\n - Enter the name Please: ")
-            
+            fName = input("** Please choose a name for your file. ( Veuillez entrez un nom pour votre fichier.)\n** Le type du fichier adopté, est le type (.txt).\n\n - Enter the name Please: ")
+            filename = verify_filename(fName)
             w = input(" - Choose the width  of your maze : ")
             h = input(" - Choose the height of your maze : ")
             
             l = Labyrinthe(int(w), int(h))
-            l.maze_on_file(file, w, h)
+            l.maze_on_file(filename, w, h)
             
             print("Congrates! You can find your file on the main directory\n")
         elif choice == 2:
