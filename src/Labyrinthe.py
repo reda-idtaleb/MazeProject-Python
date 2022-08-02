@@ -320,7 +320,7 @@ class Labyrinthe():
         L.reverse()
         return L
                     
-    def lire_fichier(self):
+    def read_file(self):
         """
         a function that will read a file and that returns the labyrinth of the type Labyrinth
         """
@@ -390,7 +390,7 @@ def main():
         elif choice == 2:
             l = Labyrinthe(0, 0)
             try:
-                l = l.lire_fichier()
+                l = l.read_file()
                 print(l)
                 print("The solution is: ", l.find_a_way(), "\n")
             except FileNotFoundError:
