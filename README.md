@@ -1,7 +1,9 @@
+# PyMaze Game
+
+# Context
+The program generally consists of creating mazes in txt format, finding the solution of each maze created, and reading the text files of which they contain mazes, then displaying its resolutions.
+
 # Operating mode
-
-- The program generally consists of creating mazes in txt format, finding the solution of each maze created, and reading the text files of which they contain mazes, then displaying its resolutions.
-
 - As soon as you launch the program, you will have to enter a name for your file, the width, and the length of the maze:
    * The text file will be automatically created after entering the name of your choice, remembering that the extension must necessarily be (.txt).
    * The destination of the created file will initially be in the same project folder. According to your desire, you can place it in any location in your pc.
