@@ -7,6 +7,7 @@ from Cellule import *
 from Stack import *
 import random
 import doctest
+from tkinter import filedialog as fd
 
 class Labyrinthe():
     """
@@ -338,7 +339,6 @@ class Labyrinthe():
         """
         A function that will read a file and that returns the labyrinth of the type Labyrinth.
         """
-        from tkinter import filedialog as fd
         file = fd.askopenfilename(title="Open a file",
                                   filetypes=(('text files', '*.txt'),)
                                   )
@@ -347,8 +347,10 @@ class Labyrinthe():
 
         op_file = open(file, "r")
         lines = op_file.readlines()
+        
         w, h = int(lines[0][:-1]), int(lines[1][:-1])
         lab = Labyrinthe(w, h)
+        
         x, y = 0, 0
         for l in range(4, len(lines)):
             if (l%2 == 0):

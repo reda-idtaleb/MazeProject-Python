@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
-
 # GNU Make 4.2.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2016 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Tue Aug  9 03:04:17 2022
+# Make data base, printed on Tue Aug  9 14:36:41 2022
 
 # Variables
 
@@ -41,7 +39,7 @@ IM_CONFIG_PHASE = 1
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
 # environment
-XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.5UPRQ1
+XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.F11JQ1
 # environment
 GDMSESSION = ubuntu-wayland
 # environment
@@ -55,7 +53,7 @@ SNAP_DATA = /var/snap/code/103
 # environment
 VSCODE_NLS_CONFIG = {"locale":"fr","availableLanguages":{"*":"fr"},"_languagePackId":"b0bb751258a71d5203cf053d90ac9f6f.fr","_translationsConfigFile":"/home/idtaleb/.config/Code/clp/b0bb751258a71d5203cf053d90ac9f6f.fr/tcf.json","_cacheRoot":"/home/idtaleb/.config/Code/clp/b0bb751258a71d5203cf053d90ac9f6f.fr","_resolvedLanguagePackCoreLocation":"/home/idtaleb/.config/Code/clp/b0bb751258a71d5203cf053d90ac9f6f.fr/da76f93349a72022ca4670c1b84860304616aaa2","_corruptedFile":"/home/idtaleb/.config/Code/clp/b0bb751258a71d5203cf053d90ac9f6f.fr/corrupted.info","_languagePackSupport":true}
 # environment
-JOURNAL_STREAM = 8:48676
+JOURNAL_STREAM = 8:176474
 # environment
 XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu-wayland:/etc/xdg
 # environment
@@ -79,7 +77,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # environment
 _ = /snap/code/103/usr/share/code/code
 # environment
-MANAGERPID = 1381
+MANAGERPID = 25419
 # environment
 LC_NAME = fr_FR.UTF-8
 # environment
@@ -91,7 +89,7 @@ MAKE_HOST := x86_64-pc-linux-gnu
 # environment
 PATH = /home/idtaleb/.jenv/shims:/home/idtaleb/.jenv/bin:/home/idtaleb/.jenv/shims:/home/idtaleb/.jenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/idtaleb/.dotnet/tools:/home/idtaleb/.dotnet/tools
 # environment
-SESSION_MANAGER = local/idtaleb-Latitude-E5470:@/tmp/.ICE-unix/1806,unix/idtaleb-Latitude-E5470:/tmp/.ICE-unix/1806
+SESSION_MANAGER = local/idtaleb-Latitude-E5470:@/tmp/.ICE-unix/25662,unix/idtaleb-Latitude-E5470:/tmp/.ICE-unix/25662
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -109,7 +107,7 @@ DISABLE_WAYLAND = 1
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-INVOCATION_ID = 00073900f85b4ce9bab8de18916b1884
+INVOCATION_ID = 6ee6dcb3c0c74b6a995b62aa1afd9f7a
 # environment
 GDK_PIXBUF_MODULEDIR = /snap/code/103/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
 # default
@@ -119,7 +117,7 @@ XDG_SESSION_DESKTOP = ubuntu-wayland
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 20225
+GIO_LAUNCHED_DESKTOP_FILE_PID = 28584
 # automatic
 %F = $(notdir $%)
 # environment
@@ -265,7 +263,7 @@ LC_ADDRESS = fr_FR.UTF-8
 # environment
 LANG = C
 # environment
-VSCODE_PID = 20273
+VSCODE_PID = 28631
 # variable set hash-table stats:
 # Load=127/1024=12%, Rehash=0, Collisions=24/152=16%
 
@@ -280,6 +278,8 @@ VSCODE_PID = 20273
 # 8 files, no impossibilities in 1 directories.
 
  
+make: *** No rule to make target 'all'.  Stop.
+
 # Implicit Rules
 
 # No implicit rules.
@@ -327,6 +327,6 @@ makefile:
 # strcache performance: lookups = 19 / hit rate = 26%
 # hash-table stats:
 # Load=14/8192=0%, Rehash=0, Collisions=1/19=5%
-# Finished Make data base on Tue Aug  9 03:04:17 2022
+# Finished Make data base on Tue Aug  9 14:36:41 2022
 
  
