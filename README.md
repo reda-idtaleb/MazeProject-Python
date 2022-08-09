@@ -14,3 +14,11 @@ On your terminal, run the command to run the program:
 ``` bash
 $ make run
 ```
+
+# Screen shots
+## Welcomig screen
+<img src="./images/welcoming.png" alt="drawing" width="1000"/>
+
+## Menu screen
+<img src="./images/menu.png" alt="drawing" width="1000"/>
+
