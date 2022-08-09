@@ -8,6 +8,7 @@ from Stack import *
 import random
 import doctest
 from tkinter import filedialog as fd
+import rich
 
 class Labyrinthe():
     """
@@ -315,21 +316,39 @@ class Labyrinthe():
         path.reverse()
         return path
     
-    def show_maze_after_resoluion(self, resolution_path):
+    def show_maze_after_resoluion(self, 
+                                  resolution_path, 
+                                  path_symbol="⬧", 
+                                  finished_symbol="●", 
+                                  path_color="green", 
+                                  finished_color="red",
+                                  with_coloring=True):
         width, height = self.get_width(), self.get_height()
         grid = ("+-" * width) + "+"
         for y in range(height):
             mur = "|"
             for x in range(width):
+                if (x, y) == (width-1, height-1):
+                    symbol = "[%s]%s[/%s]" %(finished_color, finished_symbol, finished_color) if with_coloring else finished_symbol
+                else:
+                    symbol = path_symbol    
                 if (x, y) in resolution_path:
-                    mur = mur + ".|" if self.get_cell_at_coordinate(x, y).get_right_wall() else mur + ".." 
+                    mur = mur + ("[%s]%s[/%s]|" %(path_color, symbol, path_color) 
+                                    if with_coloring 
+                                    else "%s|" %(symbol)) \
+                            if self.get_cell_at_coordinate(x, y).get_right_wall() \
+                            else mur + ("[%s]%s%s[/%s]" %(path_color, symbol, symbol, path_color) 
+                                            if with_coloring 
+                                            else "%s%s" %(symbol, symbol))
                 else:
                     mur = mur + " |" if self.get_cell_at_coordinate(x, y).get_right_wall() else mur + "  " 
             grid = grid + "\n" + mur
             mur = '+'
             for x in range(width):
                 if (x, y) in resolution_path:
-                    mur = mur + "-+" if self.get_cell_at_coordinate(x, y).get_bottom_wall() else mur + ".+"
+                    mur = mur + "-+" \
+                            if self.get_cell_at_coordinate(x, y).get_bottom_wall() \
+                            else mur + ("[%s]%s[/%s]+" %(path_color, symbol, path_color) if with_coloring else "%s+" %(symbol)) 
                 else:
                     mur = mur + "-+" if self.get_cell_at_coordinate(x, y).get_bottom_wall() else mur + " +"
             grid = grid + "\n" + mur
@@ -386,5 +405,5 @@ class Labyrinthe():
         resolution_path = self.find_a_way()
         a.write("You can think before looking at the solution, don't cheat ;)!\n\n" 
                 + "Otherwise, the resolution is:\n"  
-                + self.show_maze_after_resoluion(resolution_path))
+                + self.show_maze_after_resoluion(resolution_path, with_coloring=False))
         a.close()

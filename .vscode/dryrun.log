@@ -1,5 +1,5 @@
 make --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/idtaleb/Bureau/MazeProject-Python'
-python3 src/main.py 
+pip install rich pyfiglet
 make: Leaving directory '/home/idtaleb/Bureau/MazeProject-Python'
  
