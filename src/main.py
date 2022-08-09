@@ -83,18 +83,25 @@ def main():
         choice = show_game_menu()
         if choice == 1:
             print("** Choose a name for your file (The authorized type file is .txt).\n\n")
-            fname = asksaveasfile(initialfile='generated_maze.txt',
-                                  defaultextension=".txt",
-                                  filetypes=[("Text Documents", "*.txt"),])
-            
-            filename = verify_filename(fname.name)
-            w = input(" - Choose the width  of your maze : ")
-            h = input(" - Choose the height of your maze : ")
-            
-            l = Labyrinthe(int(w), int(h))
-            l.write_maze_to_file(filename, w, h)
-            
-            show_success_message("  You can find your file here : %s." %(filename), color=SUCCES_COLOR) 
+            try:
+                file = asksaveasfile(initialfile='generated_maze.txt',
+                                    defaultextension=".txt",
+                                    filetypes=[("Text Documents", "*.txt"),])
+                
+                if not file:
+                    raise FileNotFoundError("No file is saved.")
+                
+                filename = verify_filename(file.name)
+                w = input(" - Choose the width  of your maze : ")
+                h = input(" - Choose the height of your maze : ")
+                
+                l = Labyrinthe(int(w), int(h))
+                l.write_maze_to_file(filename, w, h)
+                
+                show_success_message("  You can find your file here : %s." %(filename), color=SUCCES_COLOR) 
+            except FileNotFoundError as e:
+                show_stylish_warning(str(e))
+                main()
         elif choice == 2:
             l = Labyrinthe(0, 0)
             try:
