@@ -17,8 +17,29 @@ $ make run
 
 # Screen shots
 ## Welcomig screen
-<img src="./images/welcoming.png" alt="drawing" width="1000"/>
+-----
+<img src="./images/welcoming.png" alt="welcoming" width="1000"/>
+
+</br>
 
 ## Menu screen
-<img src="./images/menu.png" alt="drawing" width="1000"/>
+-----
+<img src="./images/menu.png" alt="menu" width="1000"/>
 
+</br>
+
+## Generating mazes
+-----
+<img src="./images/generating.png" alt="generating" width="1000"/>
+
+</br>
+
+## Solving mazes
+-----
+<img src="./images/solving.png" alt="solving" width="1000"/>
+
+</br>
+
+## Exit the game
+-----
+<img src="./images/quit.png" alt="quit" width="1000"/>
