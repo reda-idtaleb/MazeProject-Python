@@ -34,7 +34,7 @@ def draw_grid(canvas, width, height):
     
 def main():
     win = Tk()
-    win.title('Welcome to maze game!')
+    win.title('Titre de la fenêtre')
     can = Canvas(win, bg=BG_COLOR, width=CAN_WIDTH, height=CAN_HEIGHT)
     can.bind('<Button-1>',
              lambda event: draw_circle(can,

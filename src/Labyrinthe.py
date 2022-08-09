@@ -338,7 +338,13 @@ class Labyrinthe():
         """
         A function that will read a file and that returns the labyrinth of the type Labyrinth.
         """
-        file = input("Enter the file name(only .txt extension): ")
+        from tkinter import filedialog as fd
+        file = fd.askopenfilename(title="Open a file",
+                                  filetypes=(('text files', '*.txt'),)
+                                  )
+        if not file:
+            raise FileNotFoundError("No file is selected.")
+
         op_file = open(file, "r")
         lines = op_file.readlines()
         w, h = int(lines[0][:-1]), int(lines[1][:-1])

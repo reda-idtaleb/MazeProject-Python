@@ -1,11 +1,25 @@
 from Labyrinthe import *
 
+class UnexpectedValueException(Exception):
+    pass
 
 def verify_filename(s):
     if ".txt" in s:
         return s
     else:
         return s + ".txt" 
+
+def ask_to_quit():
+    answer = input("Do you really want to quit? y/n : ")
+    print("\n")
+    if answer is "y" :
+        print("############## Goodbye! See you again ;) ##############")
+        exit()
+    elif answer is "n":
+        print("Ok, good! :)\n")
+        main()
+    else:
+        raise UnexpectedValueException("* Cannot accept the entered value : %s" % (answer))
     
 def main():
     try:
@@ -28,19 +42,26 @@ def main():
             l = Labyrinthe(0, 0)
             try:
                 l = l.read_maze_from_file()
+                resolution_path = l.find_a_way()
                 print(l)
-                print("The solution is: ", l.find_a_way(), "\n")
-            except FileNotFoundError:
-                print("\n###### Warning! File not found. Make sure you enter an existing file! ######\n")
+                print("\nThe solution is:\n%s\n" % (l.show_maze_after_resoluion(resolution_path)))
+            except FileNotFoundError as e:
+                print("\n###### Warning! %s ######\n" % (str(e)))
                 main()        
         elif choice == 3:
-            print("############## Goodbye! See you again ;) ##############")
-            exit()
+            try:
+                ask_to_quit()
+            except UnexpectedValueException as e:
+                print(str(e) + "\n")
+                ask_to_quit()
         else:
-            print("\n###### Warning! You have to inter the number 1, 2 or 3 ######\n")
-            main()
+            raise UnexpectedValueException("###### Warning! You have to inter the number 1, 2 or 3 ######")
+            
     except ValueError:
-        print("\n###### Warning: Only numbers accepted ######\n###### Please enter a valid number again! ######\n")
+        print("\n###### Warning: Only numbers accepted ######\n\n")
+        main()
+    except UnexpectedValueException as e:
+        print("%s\n" % (str(e)))
         main()
     
 def description():
