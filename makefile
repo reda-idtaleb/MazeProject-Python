@@ -1,3 +1,3 @@
 exe: 
-	python3 src/Labyrinthe.py 
+	python3 src/main.py 
 

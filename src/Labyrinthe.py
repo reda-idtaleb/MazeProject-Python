@@ -1,6 +1,6 @@
 """
-AUTHOR: OUKOUKAS Ferial, ID-TALEB Réda
-Projet: Labyrinthe
+AUTHOR: ID-TALEB Réda
+Project-name: PyMaze
 
 """
 from Cellule import *
@@ -43,7 +43,7 @@ class Labyrinthe():
         self.labyrinthe = [[Cell(x,y) for y in range(height)] for x in range(width)]
     
     
-    def __repre__(self):
+    def __repr__(self):
         """
         :return: a representation of a maze, or a representation of all
                  the cells that build a labyrinth. 
@@ -52,7 +52,7 @@ class Labyrinthe():
         
         :Example:
         >>> game = Labyrinthe(3,4)
-        >>> game.__repre1__()
+        >>> game.__repr__()
         [[(0, 0), (1, 0), (2, 0)], [(0, 1), (1, 1), (2, 1)], [(0, 2), (1, 2), (2, 2)], [(0, 3), (1, 3), (2, 3)]]
         """
         labyrinthe = [[(x,y) for x in range(self.get_width())] for y in range(self.get_height())]
@@ -104,8 +104,6 @@ class Labyrinthe():
         :return: a string representation of a grid
         :rtype: str
         :UC: none
-        :Example:
-        
         """
         width = self.get_width()
         height = self.get_height()
@@ -128,9 +126,9 @@ class Labyrinthe():
         return grid   
                 
                 
-    def neighboors_cells_possible(self, cell):
+    def get_possible_neighboring_cells(self, cell):
         """
-          this function return the neighbors of a cell that is in an initial labyrinth (without open wall).
+          This function returns the neighbors of a cell that is in an initial labyrinth (without open wall).
          :param cell: a cell in the grid of game's
          :return: a list of neighboors cells, that are possible to be visited,
                   depending on the position of the cell:
@@ -138,7 +136,7 @@ class Labyrinthe():
                   2- if the cell is located on the edges of the grid, then there are three neighboring cells.
                   3- for the other case where the cell is located in the middle of the grid, so there will be four neighboring cells.
          :rtype: (list)
-         :CU: aucune
+         :CU: none
          
         """
         width = self.get_width()
@@ -150,26 +148,25 @@ class Labyrinthe():
             y_second = cell.y + j
             if (0 <= x_second < width) and (0 <= y_second < height):
                 neighboor_cell = self.get_cell_at_coordinate(x_second, y_second)
-                if neighboor_cell.is_closed_cell():
+                if neighboor_cell.is_closed():
                     list_of_neighboors.append([d, neighboor_cell])
         return list_of_neighboors
     
     
-    def  neighbors_cell_in_real_maze(self, cell):
+    def get_cell_neighbors(self, cell):
         """
-          this function return the neighbors of a cell that is in an real maze (with open wall).
-         :param cell: a cell in the grid of game's
-         :return: a list of neighboors cells, that are possible to be visited,
+        This function returns the neighbors of a cell that is in an real maze (with open wall).
+        :param cell: a cell in the grid of game's
+        :return: a list of neighboors cells, that are possible to be visited,
                   depending on the position of the cell:
-         :rtype: (list)
-         :CU: aucune
-    
+        :rtype: (list)
+        :CU: none
         """
         width = self.get_width()
         height = self.get_height()
         liste_direction = [['haut', (0, -1)], ['bas', (0, 1)], ['gauche', (-1, 0)], ['droite', (1, 0)]]
         list_of_neighboors = []
-        cell_voisin = cell.is_not_closed_cell()
+        cell_voisin = cell.get_destroyed_walls()
         for d, (i,j) in liste_direction:
             for c in cell_voisin:
                 if d == c:
@@ -205,7 +202,7 @@ class Labyrinthe():
         y = self.get_height()
         cell_depart = self.get_cell_at_coordinate(0, 0)
         cell_arriver = self.get_cell_at_coordinate(x-1, y-1)
-        liste_neigh = self.neighbors_cell_in_real_maze(cell)
+        liste_neigh = self.get_cell_neighbors(cell)
         if cell == cell_depart:
             return True
         if cell == cell_arriver:
@@ -220,7 +217,7 @@ class Labyrinthe():
                     return True
                 
                 
-    def get_random_cell(self):
+    def get_a_random_cell(self):
         """ 
         :param x: x-coordinate of a cell
         :type x: int
@@ -237,7 +234,7 @@ class Labyrinthe():
         return self.labyrinthe[x][y]
 
     
-    def cell_state(self):
+    def make_all_cells_unvisited(self):
         """
         this function marks all the cells of a labyrinth as invisited cells,
         each cell of which corresponds to a Boolean value "False".
@@ -246,12 +243,8 @@ class Labyrinthe():
         :rtype: (dict)
         :CU: none
         """
-        labyrinthe = self.labyrinthe
-        w = self.get_width()
-        h = self.get_height()
-        length_labyrinthe = w*h
         dic = {}
-        for list_cellule in labyrinthe:
+        for list_cellule in self.labyrinthe:
             for cellule in list_cellule:
                 dic[str(cellule)] = False
         return dic
@@ -272,12 +265,12 @@ class Labyrinthe():
         number_of_cell = 1
         l = []
         while number_of_cell < length_maze:
-            list_neighboor_cell = self.neighboors_cells_possible(starting_cell)
+            list_neighboor_cell = self.get_possible_neighboring_cells(starting_cell)
             if not(list_neighboor_cell) :
                 starting_cell = l.pop()
                 continue
             direction, next_cell = random.choice(list_neighboor_cell) 
-            starting_cell.wall_destroyed_between_2_cells(next_cell, direction)
+            starting_cell.destroy_a_wall(next_cell, direction)
             l.append(starting_cell)    
             starting_cell = next_cell
             number_of_cell += 1
@@ -292,37 +285,58 @@ class Labyrinthe():
                  Algorithme: depth first search
         :rtype: list
         """
-        x = self.get_width()
-        y = self.get_height()
-        s = Stack()
-        s1 = Stack()
-        cell_depart = self.labyrinthe[0][0]
-        s.push(cell_depart)
-        dic_state = self.cell_state()
-        dic_state[str(cell_depart)] = True
-        nv = 1
-        while nv < x*y:
-            top_s = s.top()
-            neighboord_cell_top_s  = self.neighbors_cell_in_real_maze(top_s)
-            for (dire, cell_neigh) in neighboord_cell_top_s:
-                if dic_state[str(cell_neigh)] == False and self.cell_has_neighboor(s.top()) == True:
-                    s.push(cell_neigh)
+        x, y = self.get_width(), self.get_height()
+        solution, trash_stack = Stack(), Stack()
+        
+        starting_cell = self.labyrinthe[0][0]
+        solution.push(starting_cell)
+        
+        dic_state = self.make_all_cells_unvisited()
+        dic_state[str(starting_cell)] = True
+        
+        visited_cell = 1
+        while visited_cell < x*y:
+            top_s = solution.top()
+            neighboord_cell_top_s  = self.get_cell_neighbors(top_s)
+            for (_, cell_neigh) in neighboord_cell_top_s:
+                if dic_state[str(cell_neigh)] == False and self.cell_has_neighboor(solution.top()) == True:
+                    solution.push(cell_neigh)
                     dic_state[str(cell_neigh)] = True
-                elif dic_state[str(cell_neigh)] == True and self.cell_has_neighboor(s.top()) == False:
-                    s1.push(s.pop())            
-            if s.top() == self.get_cell_at_coordinate(x-1, y-1):
+                elif dic_state[str(cell_neigh)] == True and self.cell_has_neighboor(solution.top()) == False:
+                    trash_stack.push(solution.pop())            
+            if solution.top() == self.get_cell_at_coordinate(x-1, y-1):
                 break
-            nv += 1
-        L = []    
-        while not(s.is_empty()):
-            b = s.pop()
-            L = L + [b.__repre__()]  
-        L.reverse()
-        return L
+            visited_cell += 1
+        path = []    
+        while not(solution.is_empty()):
+            cell = solution.pop()
+            path = path + [cell.__repr__()]  
+        path.reverse()
+        return path
+    
+    def show_maze_after_resoluion(self, resolution_path):
+        width, height = self.get_width(), self.get_height()
+        grid = ("+-" * width) + "+"
+        for y in range(height):
+            mur = "|"
+            for x in range(width):
+                if (x, y) in resolution_path:
+                    mur = mur + ".|" if self.get_cell_at_coordinate(x, y).get_right_wall() else mur + ".." 
+                else:
+                    mur = mur + " |" if self.get_cell_at_coordinate(x, y).get_right_wall() else mur + "  " 
+            grid = grid + "\n" + mur
+            mur = '+'
+            for x in range(width):
+                if (x, y) in resolution_path:
+                    mur = mur + "-+" if self.get_cell_at_coordinate(x, y).get_bottom_wall() else mur + ".+"
+                else:
+                    mur = mur + "-+" if self.get_cell_at_coordinate(x, y).get_bottom_wall() else mur + " +"
+            grid = grid + "\n" + mur
+        return grid  
                     
-    def read_file(self):
+    def read_maze_from_file(self):
         """
-        a function that will read a file and that returns the labyrinth of the type Labyrinth
+        A function that will read a file and that returns the labyrinth of the type Labyrinth.
         """
         file = input("Enter the file name(only .txt extension): ")
         op_file = open(file, "r")
@@ -337,22 +351,22 @@ class Labyrinthe():
                         if (lines[l][i] == ' '):            
                             cell1 = lab.get_cell_at_coordinate(x, y)
                             cell2 = lab.get_cell_at_coordinate(x+1, y)
-                            cell1.wall_destroyed_between_2_cells(cell2, "droite")
+                            cell1.destroy_a_wall(cell2, "droite")
                             if(lines[l+1][i-1] == ' '):
                                 cell3 = lab.get_cell_at_coordinate(x, y+1)
-                                cell1.wall_destroyed_between_2_cells(cell3, "bas")
+                                cell1.destroy_a_wall(cell3, "bas")
                             x += 1    
                         elif (lines[l][i] == '|') and i > 0:
                             cell1 = lab.get_cell_at_coordinate(x, y)
                             if(lines[l+1][i-1] == ' '):
                                 cell3 = lab.get_cell_at_coordinate(x, y+1)
-                                cell1.wall_destroyed_between_2_cells(cell3, "bas") 
+                                cell1.destroy_a_wall(cell3, "bas") 
                             x += 1    
                 y += 1
                 x = 0
-        return lab             
-                      
-    def maze_on_file(self, file, w, h):
+        return lab                     
+                          
+    def write_maze_to_file(self, file, w, h):
         a = open(file, "w")
         self.generate_maze()
         a.write(str(w))
@@ -361,63 +375,8 @@ class Labyrinthe():
         a.write("\n\n")
         a.write(self.__str__())
         a.write("\n\n")
-        a.write("Vous pouvez réflichir avant de regarder la solution, ne trichez pas ;)!\n\n Sinon, la résolution de ce labyrinthe est:\n "+ str(self.find_a_way()))
+        resolution_path = self.find_a_way()
+        a.write("You can think before looking at the solution, don't cheat ;)!\n\n" 
+                + "Otherwise, the resolution is:\n"  
+                + self.show_maze_after_resoluion(resolution_path))
         a.close()
-
-def verify_filename(s):
-    if ".txt" in s:
-        return s
-    else:
-        return s + ".txt" 
-    
-def main():
-    try:
-        choice = int(input("-> Enter '1' if you want to generate a maze and solve it\n" +
-                           "-> Enter '2' if you want to join a file containing a maze\n"+
-                           "-> Enter '3' if you want to quit the game\n" +
-                           "My choice: "))
-        print("\n")
-        if choice == 1:
-            fName = input("** Please choose a name for your file. ( Veuillez entrez un nom pour votre fichier.)\n** Le type du fichier adopté, est le type (.txt).\n\n - Enter the name Please: ")
-            filename = verify_filename(fName)
-            w = input(" - Choose the width  of your maze : ")
-            h = input(" - Choose the height of your maze : ")
-            
-            l = Labyrinthe(int(w), int(h))
-            l.maze_on_file(filename, w, h)
-            
-            print("Congrates! You can find your file on the main directory\n")
-        elif choice == 2:
-            l = Labyrinthe(0, 0)
-            try:
-                l = l.read_file()
-                print(l)
-                print("The solution is: ", l.find_a_way(), "\n")
-            except FileNotFoundError:
-                print("\n###### Warning! File not found. Make sure you enter an existing file! ######\n")
-                main()        
-        elif choice == 3:
-            print("############## Goodbye! See you again ;) ##############")
-            exit()
-        else:
-            print("\n###### Warning! You have to inter the number 1 or 2 or 3 ######\n")
-            main()
-    except ValueError:
-        print("\n###### Warning: Only numbers accepted ######\n###### Please enter a valid number again! ######\n")
-        main()
-    
-def description():
-    print("         *-----------------------------------------------------------------*")        
-    print("         |******** Bonjour, et bienvenu dans le jeu du labyrinthe *********|\n         *-----------------------------------------------------------------*\n\n")
-    print("   -----> A Lire attentivement: Astuces/idées à-propos du fonctionnement du programme <-----\n\n")
-    print("** Le programme consiste généralement à créer des labyrinthes au format text, trouver la solution de chaque labyrinthe crée, et à lire les fichiers text dont leurs contenus sont des labyrinthes, puis l'affichage de ses résolutions\n")                                              
-    print("** Le fichier text sera créer automatiquement après la saisie du nom de votre choix, on rapelle que l'extension doit être forcément (.txt).\n   La destination du fichier crée sera initialement dans le même dossier du projet. Selon votre désire, vous pouvez le placer dans n'importe quel emplacement dans votre pc.\n")
-    print("** Pour Réussir à créer le labyrinthe qui sera afficher dans votre fichier, vous devrez d'abord choisir la taille (largueur et longueur) de votre labyrinthe.\n")
-    print("** Les valeurs qui seront entrées pour la taille du labyrinthe, doivent être uniquement des entiers.\n")
-    print("** Veuillez respecter les consignes pour une meilleure génération du labyrinthe.\n")
-
-if __name__ == '__main__':
-    #doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS, verbose=True)   
-    description()
-    while(True):
-        main()

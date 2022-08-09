@@ -1,8 +1,9 @@
 """
-AUTHOR: OUKOUKAS Ferial, ID-TALEB Réda
-Projet: Labyrinthe
+AUTHOR: ID-TALEB Réda
+Project-name: PyMaze
 """
 import random
+from types import CellType
 
 
 class Cell():
@@ -11,31 +12,29 @@ class Cell():
        Create a Cell in the maze.
        A cell in the maze is a point which may be surrounded by walls in all directions,
        
-       >>> cel = Cell(0,0)
-       >>> cell = Cell(0,1)
-       >>> cel.is_closed_cell()
-       True
-       >>> cell.is_closed_cell()
-       True
-       >>> cel.get_right_wall()
-       True
-       >>> cel.get_left_wall()
-       True
-       >>> cel.get_top_wall()
-       True
-       >>> cel.get_bottom_wall()
-       True
-       >>> cel.wall_destroyed_between_2_cells(cell,"gauche")
-       >>> cel.get_left_wall()
-       False
-       >>> cell.get_right_wall()
-       False
-       >>> cel.is_closed_cell()
-       False
+       :Examples:
        
+       >>> cell1 = Cell(0,0)
+       >>> cell2 = Cell(0,1)
+       >>> cell1.is_closed()
+       True
+       >>> cell2.is_closed()
+       True
+       >>> cell1.destroy_a_wall(cell2, "gauche")
+       >>> cell1.get_left_wall()
+       False
+       >>> cell2.get_right_wall()
+       False
+       >>> cell1.is_closed()
+       False
+       >>> cell2.is_closed()
+       False
     """
-    paire_cellule = {"haut": "bas", "bas": "haut", "droite": "gauche", "gauche": "droite"}  # dictionnaire qui représente deux cellules séparés par un mur. c'est à dire si le mur partagé est horizontal, on constuit deux murs, le premier mur situe à droite du mur séparant,
-                                                                                            # et le deuxième mur situe à gauche du mur séparant. Et si le mur partagé est horizontal, on construit le mur qui se situe en haut du mur partagé, et un autre mur qui se situe en bas.
+    # Dictionnaire qui représente deux cellules séparés par un mur. c'est à dire si le mur partagé est horizontal,
+    # on constuit deux murs, le premier mur situe à droite du mur séparant,
+    # et le deuxième mur situe à gauche du mur séparant. Et si le mur partagé est vertical, 
+    # on construit le mur qui se situe en haut du mur partagé, et un autre mur qui se situe en bas.
+    cell_pairs = {"haut": "bas", "bas": "haut", "droite": "gauche", "gauche": "droite"}  
                                                                                                                                               
     def __init__(self, x, y):
         """
@@ -47,50 +46,125 @@ class Cell():
         :Examples:
 
         >>> cel = Cell(0,0)
-        >>> cel.is_closed_cell()
+        >>> cel.is_closed()
         True
         >>> cell = Cell(0,1)
-        >>> cell.is_closed_cell()
+        >>> cell.is_closed()
         True
-        >>> cel.wall_destroyed_between_2_cells(cell,"gauche")
-        >>> cel.is_closed_cell()
+        >>> cel.destroy_a_wall(cell,"gauche")
+        >>> cel.is_closed()
         False
         
         """
         # on créé une longueur et une largueur d'un labyrinthe
         self.x = x
         self.y = y
-        # un dictionnaire qui représente les 4 murs qui entoure la cellule dans un labyrinthe, la valeur "True" veut dire que les murs existent.
-        self.wall = {'haut': True, 'bas': True, 'gauche': True, 'droite': True}
+        # un dictionnaire qui représente les 4 murs qui entoure la cellule dans un labyrinthe, 
+        # la valeur "True" veut dire que les murs existent.
+        self.walls = {'haut': True, 'bas': True, 'gauche': True, 'droite': True}
     
-    def get_coordinate_x(self):
+    def is_closed(self):
+        """
+        :return: True if all the walls of self are closed , False otherwise
+        :rtype: (bool)
+        :UC: none
+        :Example:
+
+        >>> destroyed_cell = Cell(0,0)
+        >>> destroyed_cell.is_closed()
+        True
+        >>> cell = Cell(0,1) 
+        >>> destroyed_cell.destroy_a_wall(cell, "gauche")
+        >>> destroyed_cell.is_closed()
+        False
+
+        """
+        # Si un des murs n'existe pas, donc cette cellule n'est pas fermée, donc on renvoie False.
+        # Si tous les murs existent, donc la cellule est fermée, donc on renvoie True
+        for i in self.walls.values():
+            if i == False:
+                return False
+        return True
+    
+    def destroy_a_wall(self, neighboor_cell, wall:str):
+        """
+        :param cell: (Cell) The neighboor cell.
+        :param wall: (str) The string to destroy.
+        :return: None
+        :side effect: Modify a wall status. Destroy the corresponding wall that is passed as parameter. 
+                      The wall shared between two cells.
+        :UC: none
+        
+        :Examplez:
+
+        >>> cell1 = Cell(0,0)
+        >>> cell2 = Cell(0,1)
+        >>> cell1.destroy_a_wall(cell2, "gauche")
+        >>> cell1.is_closed()
+        False
+        >>> cell1.get_all_walls()
+        {'haut': True, 'bas': True, 'gauche': False, 'droite': True}
+        >>> cell2.get_all_walls()
+        {'haut': True, 'bas': True, 'gauche': True, 'droite': False}
+        """
+        # si on souhaite détruire un mur entre deux cellules, 
+        # il suffit de détruire un mur de la cellule courante(self).
+        # En effet, puisque la cellule partage son mur avec la cellule voisine, 
+        # donc automatiquement le mur de l'autre cellule est aussi détruit.
+        self.walls[wall] = False
+        neighboor_cell.walls[self.cell_pairs[wall]] = False
+        
+    def get_destroyed_walls(self):
+        """
+        :return: a list of neighboor cells which the wall are destroyed.
+        :rtype: (list)
+        :UC: none
+
+        :Examples:
+
+        >>> left_cell = Cell(0,0)
+        >>> left_cell.is_closed()
+        True
+        >>> right_cell = Cell(0,1) 
+        >>> left_cell.destroy_a_wall(right_cell, "gauche")
+        >>> left_cell.get_destroyed_walls()
+        ['gauche']
+        """
+        l = []
+        if not(self.is_closed()):
+            for i in self.walls.keys():
+                if self.walls[i] == False:
+                    l = l + [i]
+        return l
+    
+    def get_X_coordinate(self):
         """
         :return: the x coordinate of the cell.
         :rtype: (int)
         :UC: none
         
         :Examples:
-        >>> cel = Cell(0,0)
-        >>> cel.get_coordinate_x()
+        >>> cell = Cell(0,0)
+        >>> cell.get_X_coordinate()
         0
         >>> cell = Cell(1,0)
-        >>> cell.get_coordinate_x()
+        >>> cell.get_X_coordinate()
         1
         """
         return self.x
     
-    def get_coordinate_y(self):
+    def get_Y_coordinate(self):
         """
         :return: the y coordinate of the cell.
         :rtype: (int)
         :UC: none
         
         :Examples:
-        >>> cel = Cell(0,0)
-        >>> cel.get_coordinate_y()
+        >>> cell = Cell(0,0)
+        >>> cell.get_Y_coordinate()
         0
         >>> cell = Cell(0,1)
-        >>> cell.get_coordinate_y()
+        >>> cell.get_Y_coordinate()
         1
         """
         return self.y
@@ -106,11 +180,11 @@ class Cell():
         >>> cel.get_right_wall()
         True
         >>> cell = Cell(0,1)
-        >>> cel.wall_destroyed_between_2_cells(cell,"gauche")
+        >>> cel.destroy_a_wall(cell,"gauche")
         >>> cell.get_right_wall()
         False
         """
-        return self.wall["droite"]
+        return self.walls["droite"]
         
     def get_left_wall(self):
         """
@@ -123,11 +197,11 @@ class Cell():
         >>> cel.get_left_wall()
         True
         >>> cell = Cell(0,1)
-        >>> cel.wall_destroyed_between_2_cells(cell,"droite")
+        >>> cel.destroy_a_wall(cell,"droite")
         >>> cell.get_left_wall()
         False
         """
-        return self.wall["gauche"]
+        return self.walls["gauche"]
         
     def get_top_wall(self):
         """
@@ -140,11 +214,11 @@ class Cell():
         >>> cel.get_top_wall()
         True
         >>> cell = Cell(0,1)
-        >>> cel.wall_destroyed_between_2_cells(cell,"bas")
+        >>> cel.destroy_a_wall(cell,"bas")
         >>> cell.get_top_wall()
         False
         """
-        return self.wall["haut"]
+        return self.walls["haut"]
         
     def get_bottom_wall(self):
         """
@@ -157,14 +231,14 @@ class Cell():
         >>> cel.get_bottom_wall()
         True
         >>> cell = Cell(0,1)
-        >>> cel.wall_destroyed_between_2_cells(cell,"haut")
+        >>> cel.destroy_a_wall(cell,"haut")
         >>> cell.get_bottom_wall()
         False
         
         """
-        return self.wall["bas"]
+        return self.walls["bas"]
     
-    def get_all_wall(self):
+    def get_all_walls(self):
         """
         :return:  All the wall of the cell.
         :rtype: (dict)
@@ -172,16 +246,16 @@ class Cell():
         
         :Examples:
         >>> cel = Cell(0,0)
-        >>> cel.get_all_wall()
+        >>> cel.get_all_walls()
         {'haut': True, 'bas': True, 'gauche': True, 'droite': True}
         >>> cell = Cell(0,1)
-        >>> cel.wall_destroyed_between_2_cells(cell,"haut")
-        >>> cel.get_all_wall()
+        >>> cel.destroy_a_wall(cell,"haut")
+        >>> cel.get_all_walls()
         {'haut': False, 'bas': True, 'gauche': True, 'droite': True}
         """
-        return self.wall
+        return self.walls
  
-    def __repre__(self):
+    def __repr__(self):
         """
         :return: a representation of self cell,
                  a cell is a tuple of coordinate x and y
@@ -189,90 +263,18 @@ class Cell():
         :UC: none
         :Example:
         >>> cell = Cell(0,0)
-        >>> cell.__repre__()
+        >>> cell.__repr__()
         (0, 0)
         >>> cel = Cell(1,1)
-        >>> cel.__repre__()
+        >>> cel.__repr__()
         (1, 1)
         
         """
-        cellule = (self.get_coordinate_x(), self.get_coordinate_y())
-        return cellule
+        return (self.get_X_coordinate(), self.get_Y_coordinate())
     
-    def is_closed_cell(self):
-        """
-        :return: True if all the walls of self are closed , False otherwise
-        :rtype: (bool)
-        :UC: none
-        :Example:
-
-        >>> cel = Cell(0,0)
-        >>> cel.is_closed_cell()
-        True
-        >>> cell = Cell(0,1) 
-        >>> cel.wall_destroyed_between_2_cells(cell, "gauche")
-        >>> cel.is_closed_cell()
-        False
-
-        """
-        # Si un des murs n'existe pas, donc cette cellule n'est pas fermée, donc on renvoie False.
-        # Si tous les murs existent, donc la cellule est fermée, donc on renvoie True
-        for i in self.wall.values():
-            if i == False:
-                return False
-        return True
-    
-    def wall_destroyed_between_2_cells(self, cell, wall):
-        """
-        :return: None
-        :side effect: modify a wall, destroy the corresponding wall that is passed in parameter. The wall shared between two cells.
-        :UC: none
-        :Example:
-
-        >>> cel = Cell(0,0)
-        >>> cell = Cell(0,1)
-        >>> cel.wall_destroyed_between_2_cells(cell, "gauche")
-        >>> cel.is_closed_cell()
-        False
-        >>> cel.wall
-        {'haut': True, 'bas': True, 'gauche': False, 'droite': True}
-        >>> cell.wall
-        {'haut': True, 'bas': True, 'gauche': True, 'droite': False}
-        """
-        # si on souhaite détruire un mur entre deux cellules, il suffit de détruire un mur de la cellule courante(self).
-        # En effet, puisque la cellule partage son mur avec la cellule voisine, du coup automatiquement le mur de l'autre cellule est aussi détruit.
-        self.wall[wall] = False
-        cell.wall[self.paire_cellule[wall]] = False
-        
-        
-    def is_not_closed_cell(self):
-        """
-        :return: a liste of neighboor cell which the wall are destroyed
-        :rtype: (list)
-        :UC: none
-        :Example:
-
-        >>> cel = Cell(0,0)
-        >>> cel.is_closed_cell()
-        True
-        >>> cell = Cell(0,1) 
-        >>> cel.wall_destroyed_between_2_cells(cell, "gauche")
-        >>> cel.is_not_closed_cell()
-        ['gauche']
-
-        """
-        l = []
-        if not(self.is_closed_cell()):
-            for i in self.wall.keys():
-                if self.wall[i] == False:
-                    l = l + [i]
-        return l
-    
-          
-
-          
+    def __str__(self):
+        return str((self.get_X_coordinate(), self.get_Y_coordinate()))
           
 if __name__ == '__main__':
     import doctest
     doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS, verbose=True)
-    
