@@ -79,8 +79,6 @@ class Cell():
         False
 
         """
-        # Si un des murs n'existe pas, donc cette cellule n'est pas fermée, donc on renvoie False.
-        # Si tous les murs existent, donc la cellule est fermée, donc on renvoie True
         for i in self.__walls.values():
             if i == False:
                 return False
@@ -107,10 +105,10 @@ class Cell():
         >>> cell2.get_all_walls()
         {'top': True, 'bottom': True, 'left': True, 'right': False}
         """
-        # si on souhaite détruire un mur entre deux cellules, 
-        # il suffit de détruire un mur de la cellule courante(self).
-        # En effet, puisque la cellule partage son mur avec la cellule voisine, 
-        # donc automatiquement le mur de l'autre cellule est aussi détruit.
+        #If you want to destroy a wall between two cells, 
+        # all you have to do is destroy a wall of the current cell (self). 
+        # Indeed, since the cell shares its wall with the neighboring cell, 
+        # therefore automatically the wall of the other cell is also destroyed.
         self.__walls[wall] = False
         neighboor_cell.__walls[self.__cell_pairs[wall]] = False
         
