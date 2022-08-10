@@ -1,5 +1,5 @@
 from curses import ERR
-from Labyrinthe import *
+from Maze import *
 from tkinter.filedialog import asksaveasfile
 
 import pyfiglet
@@ -106,7 +106,7 @@ def main():
                 h = input("** Choose the height of your maze : ")
                 answer_user(">> Ok.", color=SUCCES_COLOR)
                 
-                l = Labyrinthe(int(w), int(h))
+                l = Maze(int(w), int(h))
                 l.write_maze_to_file(filename, w, h)
             
                 show_success_message("  You can find your file here : %s." %(filename), color=SUCCES_COLOR) 
@@ -118,7 +118,7 @@ def main():
                 main()
         elif choice == 2:
             answer_user("Solving Mazes =>", color=FRIENDLY_COLOR, logo_mode=True)
-            l = Labyrinthe(0, 0)
+            l = Maze(0, 0)
             try:
                 l = l.read_maze_from_file()
                 print(l)

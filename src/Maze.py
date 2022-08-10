@@ -3,16 +3,16 @@ AUTHOR: ID-TALEB Réda
 Project-name: PyMaze
 
 """
-from Cellule import *
+from Cell import *
 from Stack import *
+from tkinter import filedialog as fd
+
 import random
 import doctest
-from tkinter import filedialog as fd
-import rich
 
-class Labyrinthe():
+class Maze():
     """
-    >>> game = Labyrinthe(10, 5)
+    >>> game = Maze(10, 5)
     >>> game.get_width()
     10
     >>> game.get_height()
@@ -28,104 +28,21 @@ class Labyrinthe():
         :param height: vertical size of game 
         :type height: int
         :return: a maze grid of  width*height cells 
-        :rtype: Labyrinthe
+        :rtype: Maze
         :UC: width and height must be positive integers
              
         :Example:
 
-        >>> game = Labyrinthe(10, 5)
+        >>> game = Maze(10, 5)
         >>> game.get_width()
         10
         >>> game.get_height()
         5
 
         """
-        self.width = width
-        self.height = height
-        self.labyrinthe = [[Cell(x,y) for y in range(height)] for x in range(width)]
-    
-    
-    def __repr__(self):
-        """
-        :return: a representation of a maze, or a representation of all
-                 the cells that build a labyrinth. 
-        :rtype: (list)
-        :UC: none
-        
-        :Example:
-        >>> game = Labyrinthe(3,4)
-        >>> game.__repr__()
-        [[(0, 0), (1, 0), (2, 0)], [(0, 1), (1, 1), (2, 1)], [(0, 2), (1, 2), (2, 2)], [(0, 3), (1, 3), (2, 3)]]
-        """
-        labyrinthe = [[(x,y) for x in range(self.get_width())] for y in range(self.get_height())]
-        return (labyrinthe)
-     
-     
-    def get_width(self):
-        """
-        :return: height of the grid in self
-        :rtype: int
-        :UC: none
-        
-        :Example:
-        >>> game = Labyrinthe(3,4)
-        >>> game.get_width()
-        3
-        """
-        return self.width
-    
-    def get_height(self):
-        """
-        :return: height of the grid in self
-        :rtype: int
-        :UC: none
-        
-        :Example:
-        >>> game = Labyrinthe(3,4)
-        >>> game.get_height()
-        4
-        """
-        return self.height
-    
-    
-    def get_cell_at_coordinate(self, x, y):
-        """ 
-        :param x: x-coordinate of a cell
-        :type x: int
-        :param y: y-coordinate of a cell
-        :type y: int
-        :return: the cell of coordinates (x,y) in the game's grid
-        :type: cell
-        :UC: 0 <= x < width of game and O <= y < height of game
-        """
-        return self.labyrinthe[x][y]
-    
-    
-    def __str__(self):
-        """
-        :return: a string representation of a grid
-        :rtype: str
-        :UC: none
-        """
-        width = self.get_width()
-        height = self.get_height()
-        grid = ("+-" * width) + "+"
-        for y in range(height):
-            mur = "|"
-            for x in range(width):
-                if self.get_cell_at_coordinate(x,y).get_right_wall():
-                    mur = mur + " |"
-                else:
-                    mur = mur + "  " 
-            grid = grid + "\n" + mur
-            mur = '+'
-            for x in range(width):
-                if self.get_cell_at_coordinate(x,y).get_bottom_wall():
-                    mur = mur + "-+"
-                else:
-                    mur = mur + " +"
-            grid = grid + "\n" + mur
-        return grid   
+        self.__width = width
+        self.__height = height
+        self.__grid = [[Cell(x, y) for y in range(height)] for x in range(width)]
                 
                 
     def get_possible_neighboring_cells(self, cell):
@@ -143,7 +60,7 @@ class Labyrinthe():
         """
         width = self.get_width()
         height = self.get_height()
-        liste_direction = [['haut', (0, -1)], ['bas', (0, 1)], ['gauche', (-1, 0)], ['droite', (1, 0)]]
+        liste_direction = [['top', (0, -1)], ['bottom', (0, 1)], ['left', (-1, 0)], ['right', (1, 0)]]
         list_of_neighboors = []
         for d, (i,j) in liste_direction:
             x_second = cell.x + i
@@ -166,7 +83,7 @@ class Labyrinthe():
         """
         width = self.get_width()
         height = self.get_height()
-        liste_direction = [['haut', (0, -1)], ['bas', (0, 1)], ['gauche', (-1, 0)], ['droite', (1, 0)]]
+        liste_direction = [['top', (0, -1)], ['bottom', (0, 1)], ['left', (-1, 0)], ['right', (1, 0)]]
         list_of_neighboors = []
         cell_voisin = cell.get_destroyed_walls()
         for d, (i,j) in liste_direction:
@@ -182,8 +99,6 @@ class Labyrinthe():
     
     def cell_has_neighboor(self, cell):
         """
-         this function checks if the cell has at most one neighbor, ie it is a dead end.
-         except the case of the first cell and the case of the last cell.
         :param cell: a cell in the maze
         :return: check if the cell has the neighboor or not,
                  - return True if the cell really has at least one neighboor.
@@ -194,10 +109,10 @@ class Labyrinthe():
         :CU: none
         
         :Example:
-        >>> game = Labyrinthe(4,4)
+        >>> game = Maze(4, 4)
         >>> game.generate_maze()
-        >>> cel = game.get_random_cell()
-        >>> game.cell_has_neighboor(cel)
+        >>> cell = game.get_random_cell()
+        >>> game.cell_has_neighboor(cell)
         True
         """
         x = self.get_width()
@@ -233,7 +148,7 @@ class Labyrinthe():
         h = self.get_height()
         x = random.randint(0, w - 1)
         y = random.randint(0, h - 1)
-        return self.labyrinthe[x][y]
+        return self.__grid[x][y]
 
     
     def make_all_cells_unvisited(self):
@@ -246,7 +161,7 @@ class Labyrinthe():
         :CU: none
         """
         dic = {}
-        for list_cellule in self.labyrinthe:
+        for list_cellule in self.__grid:
             for cellule in list_cellule:
                 dic[str(cellule)] = False
         return dic
@@ -260,13 +175,12 @@ class Labyrinthe():
         :UC: none
         
         """
-        w = self.get_width()
-        h = self.get_height()
-        length_maze = w * h
+        w, h = self.get_width(), self.get_height()
+        maze_size = w * h
         starting_cell = self.get_cell_at_coordinate(0, 0)
-        number_of_cell = 1
+        visited_cell = 1
         l = []
-        while number_of_cell < length_maze:
+        while visited_cell < maze_size:
             list_neighboor_cell = self.get_possible_neighboring_cells(starting_cell)
             if not(list_neighboor_cell) :
                 starting_cell = l.pop()
@@ -275,7 +189,7 @@ class Labyrinthe():
             starting_cell.destroy_a_wall(next_cell, direction)
             l.append(starting_cell)    
             starting_cell = next_cell
-            number_of_cell += 1
+            visited_cell += 1
      
      
     def find_a_way(self):
@@ -290,7 +204,7 @@ class Labyrinthe():
         x, y = self.get_width(), self.get_height()
         solution, trash_stack = Stack(), Stack()
         
-        starting_cell = self.labyrinthe[0][0]
+        starting_cell = self.__grid[0][0]
         solution.push(starting_cell)
         
         dic_state = self.make_all_cells_unvisited()
@@ -311,8 +225,8 @@ class Labyrinthe():
             visited_cell += 1
         path = []    
         while not(solution.is_empty()):
-            cell = solution.pop()
-            path = path + [cell.__repr__()]  
+            cell:Cell = solution.pop()
+            path = path + [cell.get_coordinates()]  
         path.reverse()
         return path
     
@@ -336,21 +250,21 @@ class Labyrinthe():
                     mur = mur + ("[%s]%s[/%s]|" %(path_color, symbol, path_color) 
                                     if with_coloring 
                                     else "%s|" %(symbol)) \
-                            if self.get_cell_at_coordinate(x, y).get_right_wall() \
+                            if self.get_cell_at_coordinate(x, y).has_right_wall() \
                             else mur + ("[%s]%s%s[/%s]" %(path_color, symbol, symbol, path_color) 
                                             if with_coloring 
                                             else "%s%s" %(symbol, symbol))
                 else:
-                    mur = mur + " |" if self.get_cell_at_coordinate(x, y).get_right_wall() else mur + "  " 
+                    mur = mur + " |" if self.get_cell_at_coordinate(x, y).has_right_wall() else mur + "  " 
             grid = grid + "\n" + mur
             mur = '+'
             for x in range(width):
                 if (x, y) in resolution_path:
                     mur = mur + "-+" \
-                            if self.get_cell_at_coordinate(x, y).get_bottom_wall() \
+                            if self.get_cell_at_coordinate(x, y).has_bottom_wall() \
                             else mur + ("[%s]%s[/%s]+" %(path_color, symbol, path_color) if with_coloring else "%s+" %(symbol)) 
                 else:
-                    mur = mur + "-+" if self.get_cell_at_coordinate(x, y).get_bottom_wall() else mur + " +"
+                    mur = mur + "-+" if self.get_cell_at_coordinate(x, y).has_bottom_wall() else mur + " +"
             grid = grid + "\n" + mur
         return grid  
                     
@@ -368,7 +282,7 @@ class Labyrinthe():
         lines = op_file.readlines()
         
         w, h = int(lines[0][:-1]), int(lines[1][:-1])
-        lab = Labyrinthe(w, h)
+        lab = Maze(w, h)
         
         x, y = 0, 0
         for l in range(4, len(lines)):
@@ -378,16 +292,16 @@ class Labyrinthe():
                         if (lines[l][i] == ' '):            
                             cell1 = lab.get_cell_at_coordinate(x, y)
                             cell2 = lab.get_cell_at_coordinate(x+1, y)
-                            cell1.destroy_a_wall(cell2, "droite")
+                            cell1.destroy_a_wall(cell2, "right")
                             if(lines[l+1][i-1] == ' '):
                                 cell3 = lab.get_cell_at_coordinate(x, y+1)
-                                cell1.destroy_a_wall(cell3, "bas")
+                                cell1.destroy_a_wall(cell3, "bottom")
                             x += 1    
                         elif (lines[l][i] == '|') and i > 0:
                             cell1 = lab.get_cell_at_coordinate(x, y)
                             if(lines[l+1][i-1] == ' '):
                                 cell3 = lab.get_cell_at_coordinate(x, y+1)
-                                cell1.destroy_a_wall(cell3, "bas") 
+                                cell1.destroy_a_wall(cell3, "bottom") 
                             x += 1    
                 y += 1
                 x = 0
@@ -407,3 +321,101 @@ class Labyrinthe():
                 + "Otherwise, the resolution is:\n"  
                 + self.show_maze_after_resoluion(resolution_path, with_coloring=False))
         a.close()
+        
+    def __repr__(self):
+        """
+        :return: a representation of a maze, or a representation of all
+                 the cells that build a labyrinth. 
+        :rtype: (list)
+        :UC: none
+        
+        :Example:
+        >>> game = Maze(3, 4)
+        >>> game.__repr__()
+        [[(0, 0), (1, 0), (2, 0)], 
+         [(0, 1), (1, 1), (2, 1)], 
+         [(0, 2), (1, 2), (2, 2)], 
+         [(0, 3), (1, 3), (2, 3)]]
+        """
+        return str([[(x,y) for x in range(self.get_width())] for y in range(self.get_height())])
+             
+    def get_width(self):
+        """
+        :return: height of the grid
+        :rtype: int
+        :UC: none
+        
+        :Example:
+        >>> game = Maze(3,4)
+        >>> game.get_width()
+        3
+        """
+        return self.__width
+    
+    def get_height(self):
+        """
+        :return: height of the grid
+        :rtype: int
+        :UC: none
+        
+        :Example:
+        >>> game = Maze(3,4)
+        >>> game.get_height()
+        4
+        """
+        return self.__height
+    
+    def get_grid(self):
+        """
+        :return: The grid of the game
+        :rtype: List
+        :UC: none
+        
+        :Example:
+        >>> game = Maze(3, 4)
+        >>> game.get_grid()
+        [[(0, 0), (1, 0), (2, 0)], 
+         [(0, 1), (1, 1), (2, 1)], 
+         [(0, 2), (1, 2), (2, 2)], 
+         [(0, 3), (1, 3), (2, 3)]]
+        """
+        return self.__grid
+        
+    def get_cell_at_coordinate(self, x, y):
+        """ 
+        :param x: x-coordinate of a cell
+        :type x: int
+        :param y: y-coordinate of a cell
+        :type y: int
+        :return: the cell of coordinates (x,y) in the game's grid
+        :type: cell
+        :UC: 0 <= x < width of game and O <= y < height of game
+        """
+        return self.__grid[x][y]
+    
+    
+    def __str__(self):
+        """
+        :return: a string representation of a grid
+        :rtype: str
+        :UC: none
+        """
+        width = self.get_width()
+        height = self.get_height()
+        grid = ("+-" * width) + "+"
+        for y in range(height):
+            mur = "|"
+            for x in range(width):
+                if self.get_cell_at_coordinate(x,y).has_right_wall():
+                    mur = mur + " |"
+                else:
+                    mur = mur + "  " 
+            grid = grid + "\n" + mur
+            mur = '+'
+            for x in range(width):
+                if self.get_cell_at_coordinate(x,y).has_bottom_wall():
+                    mur = mur + "-+"
+                else:
+                    mur = mur + " +"
+            grid = grid + "\n" + mur
+        return grid   
