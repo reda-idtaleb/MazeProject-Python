@@ -4,7 +4,6 @@ Project-name: PyMaze
 """
 import random
 
-
 class Cell():
     
     """
@@ -62,7 +61,9 @@ class Cell():
         # a dictionary that represents the 4 walls surrounding the cell in a labyrinth,
         # the value "True" means the walls exist.
         self.__walls = {'top': True, 'bottom': True, 'left': True, 'right': True}
-    
+        self.__is_goal_cell = False
+        self.__is_starting_cell = False
+        
     def is_closed(self):
         """
         :return: True if all the walls of self are closed , False otherwise
@@ -86,14 +87,14 @@ class Cell():
     
     def destroy_a_wall(self, neighboor_cell, wall:str):
         """
+        Modify a wall status. Destroy the corresponding wall that is passed as parameter. 
+        The wall shared between two cells.
         :param cell: (Cell) The neighboor cell.
         :param wall: (str) A wall of the self cell to destroy.
-        :return: None
-        :side effect: Modify a wall status. Destroy the corresponding wall that is passed as parameter. 
-                      The wall shared between two cells.
+        :return: None. 
         :UC: none
         
-        :Examplez:
+        :Examples:
 
         >>> cell1 = Cell(0,0)
         >>> cell2 = Cell(0,1)
@@ -258,6 +259,22 @@ class Cell():
         {'top': False, 'bottom': True, 'left': True, 'right': True}
         """
         return self.__walls
+    
+    def is_goal_cell(self):
+        return self.__is_goal_cell
+    
+    def is_starting_cell(self):
+        return self.__is_starting_cell
+    
+    def set_as_goal_cell(self):
+        if self.is_starting_cell():
+            raise AlreadyAStartingCellException("The cell is already a starting cell!")
+        self.__is_goal_cell = True
+        
+    def set_as_starting_cell(self):
+        if self.is_goal_cell():
+            raise AlreadyAGoalCellException("The cell is already a goal cell!")
+        self.__is_starting_cell = True
         
     def __repr__(self):
         """
@@ -281,6 +298,17 @@ class Cell():
         '(0, 0)' 
         """
         return str((self.get_X_coordinate(), self.get_Y_coordinate()))
+
+
+# ########## #
+# Exceptions #
+# ########## #
+class AlreadyAGoalCellException(Exception):
+    pass
+
+class AlreadyAStartingCellException(Exception):
+    pass
+          
           
 if __name__ == '__main__':
     import doctest

@@ -6,9 +6,17 @@ Project-name: PyMaze
 from Cell import *
 from Stack import *
 from tkinter import filedialog as fd
+from random import choice
 
 import random
 import doctest
+
+PATH_SYMBOL = "⬧"
+STARTING_SYMBOL = "S"
+FINISHED_SYMBOL = "T"
+
+PATH_COLOR = "green"
+FINISHED_COLOR = "red"
 
 class Maze():
     """
@@ -38,11 +46,17 @@ class Maze():
         10
         >>> game.get_height()
         5
-
         """
         self.__width = width
         self.__height = height
         self.__grid = [[Cell(x, y) for y in range(height)] for x in range(width)]
+        
+        self.__starting_cell:Cell = self.get_a_random_cell()
+        self.__starting_cell.set_as_starting_cell()
+        
+        # The goal cell should be different from the starting cell
+        self.__goal_cell:Cell = self.get_a_random_cell(without_starting_cell=True)
+        self.__goal_cell.set_as_goal_cell()
                 
                 
     def get_possible_neighboring_cells(self, cell):
@@ -63,16 +77,16 @@ class Maze():
         liste_direction = [['top', (0, -1)], ['bottom', (0, 1)], ['left', (-1, 0)], ['right', (1, 0)]]
         list_of_neighboors = []
         for d, (i,j) in liste_direction:
-            x_second = cell.x + i
-            y_second = cell.y + j
+            x_second = cell.get_X_coordinate() + i
+            y_second = cell.get_Y_coordinate() + j
             if (0 <= x_second < width) and (0 <= y_second < height):
-                neighboor_cell = self.get_cell_at_coordinate(x_second, y_second)
+                neighboor_cell = self.get_cell_at_coordinates(x_second, y_second)
                 if neighboor_cell.is_closed():
                     list_of_neighboors.append([d, neighboor_cell])
         return list_of_neighboors
     
     
-    def get_cell_neighbors(self, cell):
+    def get_cell_neighbors(self, cell:Cell):
         """
         This function returns the neighbors of a cell that is in an real maze (with open wall).
         :param cell: a cell in the grid of game's
@@ -89,10 +103,10 @@ class Maze():
         for d, (i,j) in liste_direction:
             for c in cell_voisin:
                 if d == c:
-                    x_second = cell.x + i
-                    y_second = cell.y + j
+                    x_second = cell.get_X_coordinate() + i
+                    y_second = cell.get_Y_coordinate() + j
                     if (0 <= x_second < width) and (0 <= y_second < height):
-                        neighboor_cell = self.get_cell_at_coordinate(x_second, y_second)
+                        neighboor_cell = self.get_cell_at_coordinates(x_second, y_second)
                         list_of_neighboors.append([c, neighboor_cell])
         return list_of_neighboors
     
@@ -117,8 +131,8 @@ class Maze():
         """
         x = self.get_width()
         y = self.get_height()
-        cell_depart = self.get_cell_at_coordinate(0, 0)
-        cell_arriver = self.get_cell_at_coordinate(x-1, y-1)
+        cell_depart = self.get_cell_at_coordinates(0, 0)
+        cell_arriver = self.get_cell_at_coordinates(x-1, y-1)
         liste_neigh = self.get_cell_neighbors(cell)
         if cell == cell_depart:
             return True
@@ -133,8 +147,7 @@ class Maze():
                 else:
                     return True
                 
-                
-    def get_a_random_cell(self):
+    def get_a_random_cell(self, without_starting_cell=False, without_goal_cell=False):
         """ 
         :param x: x-coordinate of a cell
         :type x: int
@@ -148,9 +161,21 @@ class Maze():
         h = self.get_height()
         x = random.randint(0, w - 1)
         y = random.randint(0, h - 1)
-        return self.__grid[x][y]
+        if without_starting_cell:
+            assert(self.__starting_cell != None)
+            x = choice([i for i in range(0, w - 1) if i != self.__starting_cell.get_X_coordinate()])
+            y = choice([i for i in range(0, h - 1) if i != self.__starting_cell.get_Y_coordinate()])
+        elif without_goal_cell:
+            assert(self.__goal_cell != None)
+            x = choice([i for i in range(0, w - 1) if i != self.__goal_cell.get_X_coordinate()])
+            y = choice([i for i in range(0, h - 1) if i != self.__goal_cell.get_Y_coordinate()])
+        elif without_starting_cell and without_goal_cell:
+            assert(self.__starting_cell != None)
+            assert(self.__goal_cell != None)
+            x = choice([i for i in range(0, w - 1) if i not in [self.__starting_cell.get_X_coordinate(), self.__goal_cell.get_X_coordinate()]])
+            y = choice([i for i in range(0, h - 1) if i not in [self.__starting_cell.get_Y_coordinate(), self.__goal_cell.get_Y_coordinate()]])
+        return self.get_cell_at_coordinates(x, y)
 
-    
     def make_all_cells_unvisited(self):
         """
         this function marks all the cells of a labyrinth as invisited cells,
@@ -177,7 +202,7 @@ class Maze():
         """
         w, h = self.get_width(), self.get_height()
         maze_size = w * h
-        starting_cell = self.get_cell_at_coordinate(0, 0)
+        starting_cell:Cell = self.get_a_random_cell(0, 0)
         visited_cell = 1
         l = []
         while visited_cell < maze_size:
@@ -204,11 +229,10 @@ class Maze():
         x, y = self.get_width(), self.get_height()
         solution, trash_stack = Stack(), Stack()
         
-        starting_cell = self.__grid[0][0]
-        solution.push(starting_cell)
+        solution.push(self.__starting_cell)
         
         dic_state = self.make_all_cells_unvisited()
-        dic_state[str(starting_cell)] = True
+        dic_state[str(self.__starting_cell)] = True
         
         visited_cell = 1
         while visited_cell < x*y:
@@ -220,92 +244,41 @@ class Maze():
                     dic_state[str(cell_neigh)] = True
                 elif dic_state[str(cell_neigh)] == True and self.cell_has_neighboor(solution.top()) == False:
                     trash_stack.push(solution.pop())            
-            if solution.top() == self.get_cell_at_coordinate(x-1, y-1):
+            if solution.top() == self.get_goal_cell():
                 break
             visited_cell += 1
         path = []    
         while not(solution.is_empty()):
             cell:Cell = solution.pop()
             path = path + [cell.get_coordinates()]  
+        path += [self.get_goal_cell()]
         path.reverse()
         return path
     
     def show_maze_after_resoluion(self, 
-                                  resolution_path, 
-                                  path_symbol="⬧", 
-                                  finished_symbol="●", 
-                                  path_color="green", 
-                                  finished_color="red",
-                                  with_coloring=True):
+                                  resolution_path,
+                                  with_colors=True):
         width, height = self.get_width(), self.get_height()
         grid = ("+-" * width) + "+"
         for y in range(height):
             mur = "|"
             for x in range(width):
-                if (x, y) == (width-1, height-1):
-                    symbol = "[%s]%s[/%s]" %(finished_color, finished_symbol, finished_color) if with_coloring else finished_symbol
-                else:
-                    symbol = path_symbol    
+                symbol = self.__get_cell_symbol(x, y, when_solving=True, with_colors=with_colors)   
                 if (x, y) in resolution_path:
-                    mur = mur + ("[%s]%s[/%s]|" %(path_color, symbol, path_color) 
-                                    if with_coloring 
-                                    else "%s|" %(symbol)) \
-                            if self.get_cell_at_coordinate(x, y).has_right_wall() \
-                            else mur + ("[%s]%s%s[/%s]" %(path_color, symbol, symbol, path_color) 
-                                            if with_coloring 
-                                            else "%s%s" %(symbol, symbol))
+                    mur = mur + "%s|" %(symbol) if self.get_cell_at_coordinates(x, y).has_right_wall() \
+                                                else mur + "%s%s" %(symbol, (symbol if symbol == PATH_SYMBOL else PATH_SYMBOL))
                 else:
-                    mur = mur + " |" if self.get_cell_at_coordinate(x, y).has_right_wall() else mur + "  " 
+                    mur = mur + " |" if self.get_cell_at_coordinates(x, y).has_right_wall() else mur + "  " 
             grid = grid + "\n" + mur
             mur = '+'
             for x in range(width):
+                
                 if (x, y) in resolution_path:
-                    mur = mur + "-+" \
-                            if self.get_cell_at_coordinate(x, y).has_bottom_wall() \
-                            else mur + ("[%s]%s[/%s]+" %(path_color, symbol, path_color) if with_coloring else "%s+" %(symbol)) 
+                    mur = mur + "-+" if self.get_cell_at_coordinates(x, y).has_bottom_wall() else mur + "%s+" %(PATH_SYMBOL) 
                 else:
-                    mur = mur + "-+" if self.get_cell_at_coordinate(x, y).has_bottom_wall() else mur + " +"
+                    mur = mur + "-+" if self.get_cell_at_coordinates(x, y).has_bottom_wall() else mur + " +"
             grid = grid + "\n" + mur
-        return grid  
-                    
-    def read_maze_from_file(self):
-        """
-        A function that will read a file and that returns the labyrinth of the type Labyrinth.
-        """
-        file = fd.askopenfilename(title="Open a file",
-                                  filetypes=(('text files', '*.txt'),)
-                                  )
-        if not file:
-            raise FileNotFoundError("No file is selected.")
-
-        op_file = open(file, "r")
-        lines = op_file.readlines()
-        
-        w, h = int(lines[0][:-1]), int(lines[1][:-1])
-        lab = Maze(w, h)
-        
-        x, y = 0, 0
-        for l in range(4, len(lines)):
-            if (l%2 == 0):
-                for i in range(w*2+1):
-                    if (i%2 == 0):
-                        if (lines[l][i] == ' '):            
-                            cell1 = lab.get_cell_at_coordinate(x, y)
-                            cell2 = lab.get_cell_at_coordinate(x+1, y)
-                            cell1.destroy_a_wall(cell2, "right")
-                            if(lines[l+1][i-1] == ' '):
-                                cell3 = lab.get_cell_at_coordinate(x, y+1)
-                                cell1.destroy_a_wall(cell3, "bottom")
-                            x += 1    
-                        elif (lines[l][i] == '|') and i > 0:
-                            cell1 = lab.get_cell_at_coordinate(x, y)
-                            if(lines[l+1][i-1] == ' '):
-                                cell3 = lab.get_cell_at_coordinate(x, y+1)
-                                cell1.destroy_a_wall(cell3, "bottom") 
-                            x += 1    
-                y += 1
-                x = 0
-        return lab                     
+        return grid                      
                           
     def write_maze_to_file(self, file, w, h):
         a = open(file, "w")
@@ -315,11 +288,6 @@ class Maze():
         a.write(str(h))
         a.write("\n\n")
         a.write(self.__str__())
-        a.write("\n\n")
-        resolution_path = self.find_a_way()
-        a.write("You can think before looking at the solution, don't cheat ;)!\n\n" 
-                + "Otherwise, the resolution is:\n"  
-                + self.show_maze_after_resoluion(resolution_path, with_coloring=False))
         a.close()
         
     def __repr__(self):
@@ -381,7 +349,7 @@ class Maze():
         """
         return self.__grid
         
-    def get_cell_at_coordinate(self, x, y):
+    def get_cell_at_coordinates(self, x, y):
         """ 
         :param x: x-coordinate of a cell
         :type x: int
@@ -393,6 +361,23 @@ class Maze():
         """
         return self.__grid[x][y]
     
+    def get_goal_cell(self):
+        return self.__goal_cell
+    
+    def get_starting_cell(self):
+        return self.__starting_cell
+    
+    def __get_cell_symbol(self, x, y, when_solving=False, with_colors=False):
+        if self.get_cell_at_coordinates(x, y).is_goal_cell():
+            symbol = "[%s]%s[/%s]" %(FINISHED_COLOR, FINISHED_SYMBOL, FINISHED_COLOR) if with_colors else FINISHED_SYMBOL
+        elif self.get_cell_at_coordinates(x, y).is_starting_cell():
+            symbol = STARTING_SYMBOL  
+        else:
+            if when_solving:
+                symbol = "[%s]%s[/%s]" %(PATH_COLOR, PATH_SYMBOL, PATH_COLOR) if with_colors else PATH_SYMBOL
+            else:    
+                symbol = " "
+        return symbol
     
     def __str__(self):
         """
@@ -406,16 +391,57 @@ class Maze():
         for y in range(height):
             mur = "|"
             for x in range(width):
-                if self.get_cell_at_coordinate(x,y).has_right_wall():
-                    mur = mur + " |"
+                symbol = self.__get_cell_symbol(x, y)
+                if self.get_cell_at_coordinates(x,y).has_right_wall():
+                    mur = mur + "%s|" %(symbol)
                 else:
-                    mur = mur + "  " 
+                    mur = mur + "%s " %(symbol)
             grid = grid + "\n" + mur
             mur = '+'
             for x in range(width):
-                if self.get_cell_at_coordinate(x,y).has_bottom_wall():
+                if self.get_cell_at_coordinates(x,y).has_bottom_wall():
                     mur = mur + "-+"
                 else:
-                    mur = mur + " +"
+                    mur = mur + " +" 
             grid = grid + "\n" + mur
         return grid   
+    
+    
+def read_maze_from_file():
+        """
+        A function that will read a file and that returns the labyrinth of the type Labyrinth.
+        """
+        file = fd.askopenfilename(title="Open a file",
+                                  filetypes=(('text files', '*.txt'),)
+                                  )
+        if not file:
+            raise FileNotFoundError("No file is selected.")
+
+        op_file = open(file, "r")
+        lines = op_file.readlines()
+        
+        w, h = int(lines[0][:-1]), int(lines[1][:-1])
+        maze = Maze(w, h)
+        
+        x, y = 0, 0
+        for l in range(4, len(lines)):
+            if (l%2 == 0):
+                for i in range(w*2+1):
+                    if (i%2 == 0):
+                        if (lines[l][i] == ' '):            
+                            cell1 = maze.get_cell_at_coordinates(x, y)
+                            cell2 = maze.get_cell_at_coordinates(x+1, y)
+                            cell1.destroy_a_wall(cell2, "right")
+                            if(lines[l+1][i-1] == ' '):
+                                cell3 = maze.get_cell_at_coordinates(x, y+1)
+                                cell1.destroy_a_wall(cell3, "bottom")
+                            x += 1    
+                        elif (lines[l][i] == '|') and i > 0:
+                            cell1 = maze.get_cell_at_coordinates(x, y)
+                            if(lines[l+1][i-1] == ' '):
+                                cell3 = maze.get_cell_at_coordinates(x, y+1)
+                                cell1.destroy_a_wall(cell3, "bottom") 
+                            x += 1    
+                y += 1
+                x = 0
+        return maze 

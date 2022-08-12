@@ -1,4 +1,3 @@
-from curses import ERR
 from Maze import *
 from tkinter.filedialog import asksaveasfile
 
@@ -118,9 +117,8 @@ def main():
                 main()
         elif choice == 2:
             answer_user("Solving Mazes =>", color=FRIENDLY_COLOR, logo_mode=True)
-            l = Maze(0, 0)
             try:
-                l = l.read_maze_from_file()
+                l:Maze = read_maze_from_file()
                 print(l)
                 resolution_path = l.find_a_way()
                 rich.print("[%s]\nThe solution is:[/%s]" %(SUCCES_COLOR, SUCCES_COLOR))  
