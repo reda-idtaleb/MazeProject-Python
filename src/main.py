@@ -11,6 +11,7 @@ CHOICE_COLOR = "cyan"
 ERROR_COLOR  = "red"
 SUCCES_COLOR = "green"
 FRIENDLY_COLOR = "blue"
+STANDARD_COLOR = "white"
 
 def verify_filename(s):
     if ".txt" in s:
@@ -33,9 +34,9 @@ def ask_to_quit():
 def show_game_menu():
     print('\n')
     print_ascii_text("Menu")
-    rich.print(f"[%s]{'1.'}[/%s] Enter '1' if you want to generate a maze and solve it.\n"\
-                f"[%s]{'2.'}[/%s] Enter '2' if you want to join a file containing a maze.\n"\
-                f"[%s]{'3.'}[/%s] Enter '3' if you want to quit the game.\n\n" \
+    rich.print(f"[%s]{'1.'}[/%s] Enter '1' if you want to generate a maze as a txt file.\n"\
+                f"[%s]{'2.'}[/%s] Enter '2' if you want to join a file containing a maze and solve it.\n"\
+                f"[%s]{'3.'}[/%s] Enter '3' if you want to quit the program.\n\n" \
                 %(CHOICE_COLOR, CHOICE_COLOR,
                 CHOICE_COLOR, CHOICE_COLOR,
                 CHOICE_COLOR, CHOICE_COLOR))
@@ -76,12 +77,18 @@ def show_success_message(text, color):
     print_ascii_text("Finished !", color)
     rich.print(f'[%s]%s[/%s]' %(color, text,  color)) 
 
-def answer_user(text, color, logo_mode=False):
+def answer_user(text, color, logo_mode=False, new_line_after=True):
     if logo_mode:
         print_ascii_text(text, color)
+        print("\n")
     else:
-        rich.print("[%s]%s[/%s]" %(color, text, color))
-    print("\n")
+        rich.print("%s[%s]%s[/%s]%s" %("" if new_line_after else "\n",
+                                       color, 
+                                       text, 
+                                       color,
+                                       "\n" if new_line_after else ""))
+        
+    
         
 def main():
     try:
@@ -105,8 +112,8 @@ def main():
                 h = input("** Choose the height of your maze : ")
                 answer_user(">> Ok.", color=SUCCES_COLOR)
                 
-                l = Maze(int(w), int(h))
-                l.write_maze_to_file(filename, w, h)
+                maze = Maze(int(w), int(h))
+                maze.write_maze_to_file(filename, w, h)
             
                 show_success_message("  You can find your file here : %s." %(filename), color=SUCCES_COLOR) 
                 
@@ -118,11 +125,14 @@ def main():
         elif choice == 2:
             answer_user("Solving Mazes =>", color=FRIENDLY_COLOR, logo_mode=True)
             try:
-                l:Maze = read_maze_from_file()
-                print(l)
-                resolution_path = l.find_a_way()
-                rich.print("[%s]\nThe solution is:[/%s]" %(SUCCES_COLOR, SUCCES_COLOR))  
-                rich.print(l.show_maze_after_resoluion(resolution_path))
+                maze:Maze = read_maze_from_file()
+                answer_user("The maze:", ERROR_COLOR, new_line_after=False)
+                print(maze)
+                
+                breakpoint()
+                resolution_path = maze.find_a_way()
+                answer_user("The solution is:", SUCCES_COLOR, new_line_after=False)  
+                answer_user(maze.show_maze_after_resoluion(resolution_path), STANDARD_COLOR)
             except FileNotFoundError as e:
                 show_stylish_warning(str(e))
                 main()        

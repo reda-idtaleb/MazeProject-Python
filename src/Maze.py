@@ -3,6 +3,7 @@ AUTHOR: ID-TALEB Réda
 Project-name: PyMaze
 
 """
+from lib2to3.pgen2.parse import ParseError
 from Cell import *
 from Stack import *
 from tkinter import filedialog as fd
@@ -287,7 +288,7 @@ class Maze():
         a.write("\n")
         a.write(str(h))
         a.write("\n\n")
-        a.write(self.__str__())
+        a.write(str(self))
         a.close()
         
     def __repr__(self):
@@ -364,9 +365,19 @@ class Maze():
     def get_goal_cell(self):
         return self.__goal_cell
     
+    def set_goal_cell(self, new_goal_cell:Cell):
+        self.__goal_cell.unset_goal_cell()
+        new_goal_cell.set_as_goal_cell()
+        self.__goal_cell = new_goal_cell
+    
     def get_starting_cell(self):
         return self.__starting_cell
     
+    def set_starting_cell(self, new_starting_cell:Cell):
+        self.__starting_cell.unset_starting_cell()
+        new_starting_cell.set_as_starting_cell()
+        self.__starting_cell = new_starting_cell
+        
     def __get_cell_symbol(self, x, y, when_solving=False, with_colors=False):
         if self.get_cell_at_coordinates(x, y).is_goal_cell():
             symbol = "[%s]%s[/%s]" %(FINISHED_COLOR, FINISHED_SYMBOL, FINISHED_COLOR) if with_colors else FINISHED_SYMBOL
@@ -405,43 +416,76 @@ class Maze():
                     mur = mur + " +" 
             grid = grid + "\n" + mur
         return grid   
+
+
+def __clean_lines(lines:list):
+    cleaned_list = [line.strip(" \n") for line in lines]
+    return [line for line in cleaned_list if line] 
+
+def __parse(lines):
+    from collections import namedtuple
+    assert(int(lines[0]))
+    assert(int(lines[1]))
     
+    width = int(lines[0])
+    height = int(lines[1])
+    grid:list = lines[2:]
+    
+    for i in range(len(grid)):
+        if (i%2) == 0:
+            if ("+" or "-") not in grid[i]:
+                raise ParseException("Unrecognized character in : " + grid[i])
+        else:
+            if ("|" or " ") not in grid[i]:
+                raise ParseException("Unrecognized character in : " + grid[i])
+    
+    Maze = namedtuple("Maze", "width height grid")
+    return Maze(width, height, grid)
+
     
 def read_maze_from_file():
-        """
-        A function that will read a file and that returns the labyrinth of the type Labyrinth.
-        """
-        file = fd.askopenfilename(title="Open a file",
-                                  filetypes=(('text files', '*.txt'),)
-                                  )
-        if not file:
-            raise FileNotFoundError("No file is selected.")
+    """
+    A function that will read a file and that returns the labyrinth of the type Labyrinth.
+    """
+    selected_file = fd.askopenfilename(title="Open a file",
+                                       filetypes=(('text files', '*.txt'),))
+    if not selected_file:
+        raise FileNotFoundError("No file is selected.")
 
-        op_file = open(file, "r")
-        lines = op_file.readlines()
-        
-        w, h = int(lines[0][:-1]), int(lines[1][:-1])
-        maze = Maze(w, h)
-        
+    with open(selected_file, "r") as file:
+        lines = __clean_lines(file.readlines())
+        parsed = __parse(lines)
+        maze = Maze(parsed.width, parsed.height) 
+    
         x, y = 0, 0
-        for l in range(4, len(lines)):
-            if (l%2 == 0):
-                for i in range(w*2+1):
-                    if (i%2 == 0):
-                        if (lines[l][i] == ' '):            
+        for l in range(len(parsed.grid)):
+            if l % 2:
+                for i in range(maze.get_width()*2+1):
+                    if (i % 2) == 0:
+                        if (parsed.grid[l][i] == ' '):            
                             cell1 = maze.get_cell_at_coordinates(x, y)
                             cell2 = maze.get_cell_at_coordinates(x+1, y)
                             cell1.destroy_a_wall(cell2, "right")
-                            if(lines[l+1][i-1] == ' '):
+                            if(parsed.grid[l+1][i-1] == ' '):
                                 cell3 = maze.get_cell_at_coordinates(x, y+1)
                                 cell1.destroy_a_wall(cell3, "bottom")
                             x += 1    
-                        elif (lines[l][i] == '|') and i > 0:
+                        elif (parsed.grid[l][i] == '|') and i > 0:
                             cell1 = maze.get_cell_at_coordinates(x, y)
-                            if(lines[l+1][i-1] == ' '):
+                            if(parsed.grid[l+1][i-1] == ' '):
                                 cell3 = maze.get_cell_at_coordinates(x, y+1)
                                 cell1.destroy_a_wall(cell3, "bottom") 
-                            x += 1    
+                            x += 1  
+                    else:
+                        if parsed.grid[l][i] == STARTING_SYMBOL:
+                            start_cell = maze.get_cell_at_coordinates(x, y)
+                            maze.set_starting_cell(start_cell)
+                        elif parsed.grid[l][i] == FINISHED_SYMBOL:
+                            goal_cell = maze.get_cell_at_coordinates(x, y)
+                            maze.set_goal_cell(goal_cell)    
                 y += 1
                 x = 0
-        return maze 
+    return maze     
+
+class ParseException(Exception):
+    pass

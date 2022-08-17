@@ -275,7 +275,15 @@ class Cell():
         if self.is_goal_cell():
             raise AlreadyAGoalCellException("The cell is already a goal cell!")
         self.__is_starting_cell = True
+    
+    def unset_goal_cell(self):
+        if self.is_goal_cell():
+            self.__is_goal_cell = False 
         
+    def unset_starting_cell(self):
+        if self.is_starting_cell():
+            self.__is_starting_cell = False
+           
     def __repr__(self):
         """
         :return: a representation of self cell,
