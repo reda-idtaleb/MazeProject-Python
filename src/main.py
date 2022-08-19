@@ -1,12 +1,10 @@
-from Maze import *
+from maze import *
 from tkinter.filedialog import asksaveasfile
+from music_player import MusicPlayer, DEFAULT_MUSIC
+from maze_reader import ParseException, read_maze_from_file
 
 import pyfiglet
 import rich
-from music_player import MusicPlayer, DEFAULT_MUSIC
-
-class UnexpectedValueException(Exception):
-    pass
 
 CHOICE_COLOR = "cyan"
 ERROR_COLOR  = "red"
@@ -14,8 +12,6 @@ SUCCES_COLOR = "green"
 FRIENDLY_COLOR = "blue"
 STANDARD_COLOR = "white"
 
-
-        
     
 class Main():
     def __init__(self):
@@ -42,7 +38,7 @@ class Main():
 
     def show_game_menu(self):
         def _create_menu_item(item_number:int, text, color=CHOICE_COLOR):
-            rich.print("[%s]%d[/%s] Enter '%d' %s\n" %(color, item_number, color, item_number, text))
+            rich.print("[%s]%d.[/%s] Enter '%d' %s\n" %(color, item_number, color, item_number, text))
         
         print('\n')
         self.print_ascii_text("Menu")
@@ -148,7 +144,11 @@ class Main():
                     self.answer_user(maze.show_maze_after_resoluion(resolution_path), STANDARD_COLOR)
                 except FileNotFoundError as e:
                     self.show_stylish_warning(str(e))
-                    self.main()        
+                    self.main()
+                except ParseException as e:
+                    self.show_stylish_warning(str(e))
+                    self.main()    
+                        
             elif choice == 3:
                 self.answer_user("Music Player =>", color=FRIENDLY_COLOR, logo_mode=True)
                 if self.__music_player.is_playing:
@@ -174,6 +174,9 @@ class Main():
             self.show_stylish_warning(str(e))
             self.main()
          
+
+class UnexpectedValueException(Exception):
+    pass
  
     
 if __name__ == '__main__':
