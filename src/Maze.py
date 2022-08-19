@@ -3,7 +3,6 @@ AUTHOR: ID-TALEB Réda
 Project-name: PyMaze
 
 """
-from lib2to3.pgen2.parse import ParseError
 from Cell import *
 from Stack import *
 from tkinter import filedialog as fd
