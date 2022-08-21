@@ -95,10 +95,7 @@ class Maze():
         :rtype: (bool)
         :CU: none
         """
-        s, g = self.get_starting_cell(), self.get_goal_cell()
         neighbors_list = self.get_neighboring_cells(cell, True)
-        if cell == s or cell == g:
-            return True
         return True if len(neighbors_list) >= 1 else False
 
                 
