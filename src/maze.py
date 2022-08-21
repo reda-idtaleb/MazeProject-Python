@@ -3,22 +3,18 @@ AUTHOR: ID-TALEB Réda
 Project-name: PyMaze
 
 """
-from collections import deque
-import queue
 from cell import *
-from Stack import *
-
 from random import choice
+from constants import FINISHED_COLOR, \
+                      FINISHED_SYMBOL, \
+                      PATH_COLOR, \
+                      PATH_SYMBOL, \
+                      STARTING_SYMBOL
 
 import random
 import doctest
+import queue
 
-PATH_SYMBOL = "⬧"
-STARTING_SYMBOL = "S"
-FINISHED_SYMBOL = "T"
-
-PATH_COLOR = "green"
-FINISHED_COLOR = "red"
 
 class Maze():
     """

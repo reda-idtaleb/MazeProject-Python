@@ -1,5 +1,7 @@
-from maze import FINISHED_SYMBOL, STARTING_SYMBOL, Maze
+from maze import Maze
 from tkinter import filedialog as fd
+
+from constants import STARTING_SYMBOL, FINISHED_SYMBOL
 
 def __clean_lines(lines:list[str]):
     cleaned_list = [line.strip(" \n") for line in lines]

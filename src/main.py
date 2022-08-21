@@ -1,16 +1,16 @@
 from maze import *
 from tkinter.filedialog import asksaveasfile
-from music_player import MusicPlayer, DEFAULT_MUSIC
+from music_player import MusicPlayer
 from maze_reader import ParseException, read_maze_from_file
+from constants import DEFAULT_MUSIC, \
+                      ERROR_COLOR, \
+                      FRIENDLY_COLOR, \
+                      CHOICE_COLOR, \
+                      STANDARD_COLOR, \
+                      SUCCES_COLOR
 
 import pyfiglet
 import rich
-
-CHOICE_COLOR = "cyan"
-ERROR_COLOR  = "red"
-SUCCES_COLOR = "green"
-FRIENDLY_COLOR = "blue"
-STANDARD_COLOR = "white"
 
     
 class Main():

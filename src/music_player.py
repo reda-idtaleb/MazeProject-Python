@@ -5,8 +5,7 @@ import pygame
 from pygame.locals import *
 from pygame import mixer
 
-MUSIC_DIR = "musics/"
-DEFAULT_MUSIC = "pearls.ogg"
+from constants import MUSIC_DIR
 
 class MusicPlayer():
     def __init__(self, dir=MUSIC_DIR, randomize=True, music_name=""):
