@@ -133,7 +133,7 @@ class Cell():
         if not(self.is_closed()):
             for i in self.__walls.keys():
                 if self.__walls[i] == False:
-                    l = l + [i]
+                    l.append(i)
         return l
     
     def get_X_coordinate(self):

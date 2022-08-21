@@ -14,14 +14,14 @@ def __parse(lines):
     width = int(lines[0])
     height = int(lines[1])
     grid:list = lines[2:]
-    
-    expected_line_length = width*2+1
-    is_same_length = [len(line) == (expected_line_length) for line in grid]
+
+    expected_width, expected_height = width*2+1, height*2+1
+    is_same_length = [len(line) == (expected_width) for line in grid]
     
     if not all(is_same_length):
-        raise ParseException("The grid lines don't have the expected(%s) length." %(expected_line_length)) 
+        raise ParseException("The grid lines don't have the expected(%s) width." %(width)) 
     
-    if len(grid) != height:
+    if len(grid) != expected_height:
         raise ParseException("The grid don't have the expected(%s) height." %(height)) 
            
     for i in range(len(grid)):
@@ -49,7 +49,10 @@ def read_maze_from_file():
         lines = __clean_lines(file.readlines())
         parsed = __parse(lines)
         maze = Maze(parsed.width, parsed.height) 
-    
+        
+        maze.get_starting_cell().unset_starting_cell()
+        maze.get_goal_cell().unset_goal_cell()
+        
         x, y = 0, 0
         for l in range(len(parsed.grid)):
             if l % 2:

@@ -3,6 +3,8 @@ AUTHOR: ID-TALEB Réda
 Project-name: PyMaze
 
 """
+from collections import deque
+import queue
 from cell import *
 from Stack import *
 
@@ -31,21 +33,23 @@ class Maze():
         """
          build a maze grid of size width*height cells 
 
-        :param width: horizontal size of game 
-        :type width: int
-        :param height: vertical size of game 
-        :type height: int
-        :return: a maze grid of  width*height cells 
-        :rtype: Maze
+        :param width: (int) horizontal size of game 
+        :param height: (int) vertical size of game 
+        :return: (Maze) a maze grid of  width*height cells 
+        
         :UC: width and height must be positive integers
              
         :Example:
 
-        >>> game = Maze(10, 5)
-        >>> game.get_width()
-        10
-        >>> game.get_height()
-        5
+        >>> maze = Maze(3, 3)
+        >>> maze.get_width()
+        3
+        >>> maze.get_height()
+        3
+        >>> maze.get_grid()
+        [[(0, 0), (1, 0), (2, 0)],
+         [(0, 1), (1, 1), (2, 1)],
+         [(0, 2), (1, 2), (2, 2)]]
         """
         self.__width = width
         self.__height = height
@@ -57,105 +61,58 @@ class Maze():
         # The goal cell should be different from the starting cell
         self.__goal_cell:Cell = self.get_a_random_cell(without_starting_cell=True)
         self.__goal_cell.set_as_goal_cell()
-                
-                
-    def get_possible_neighboring_cells(self, cell):
-        """
-          This function returns the neighbors of a cell that is in an initial labyrinth (without open wall).
-         :param cell: a cell in the grid of game's
-         :return: a list of neighboors cells, that are possible to be visited,
-                  depending on the position of the cell:
-                  1- if the cell is located in the corner of the grid, so there will be two neighboring cells.
-                  2- if the cell is located on the edges of the grid, then there are three neighboring cells.
-                  3- for the other case where the cell is located in the middle of the grid, so there will be four neighboring cells.
-         :rtype: (list)
-         :CU: none
-         
-        """
-        width = self.get_width()
-        height = self.get_height()
-        liste_direction = [['top', (0, -1)], ['bottom', (0, 1)], ['left', (-1, 0)], ['right', (1, 0)]]
-        list_of_neighboors = []
-        for d, (i,j) in liste_direction:
-            x_second = cell.get_X_coordinate() + i
-            y_second = cell.get_Y_coordinate() + j
-            if (0 <= x_second < width) and (0 <= y_second < height):
-                neighboor_cell = self.get_cell_at_coordinates(x_second, y_second)
-                if neighboor_cell.is_closed():
-                    list_of_neighboors.append([d, neighboor_cell])
-        return list_of_neighboors
     
     
-    def get_cell_neighbors(self, cell:Cell):
+    def get_neighboring_cells(self, cell:Cell, with_destroyed_walls:bool):
         """
         This function returns the neighbors of a cell that is in an real maze (with open wall).
         :param cell: a cell in the grid of game's
+        :param with_destroyed_walls: set as True to get the neighboring cells from the original grid.
+                                     without open walls.
         :return: a list of neighboors cells, that are possible to be visited,
                   depending on the position of the cell:
         :rtype: (list)
         :CU: none
         """
-        width = self.get_width()
-        height = self.get_height()
-        liste_direction = [['top', (0, -1)], ['bottom', (0, 1)], ['left', (-1, 0)], ['right', (1, 0)]]
-        list_of_neighboors = []
-        cell_voisin = cell.get_destroyed_walls()
-        for d, (i,j) in liste_direction:
-            for c in cell_voisin:
-                if d == c:
-                    x_second = cell.get_X_coordinate() + i
-                    y_second = cell.get_Y_coordinate() + j
-                    if (0 <= x_second < width) and (0 <= y_second < height):
-                        neighboor_cell = self.get_cell_at_coordinates(x_second, y_second)
-                        list_of_neighboors.append([c, neighboor_cell])
-        return list_of_neighboors
+        directions = [['top', (0, -1)], ['bottom', (0, 1)], ['left', (-1, 0)], ['right', (1, 0)]]
+        neighbor_cells = []
+        neighb_cell = cell.get_destroyed_walls()
+        for d, (i, j) in directions:
+            x_neighb = cell.get_X_coordinate() + i
+            y_neighb = cell.get_Y_coordinate() + j
+            if (0 <= x_neighb < self.get_width()) and (0 <= y_neighb < self.get_height()):
+                neighbor_cell = self.get_cell_at_coordinates(x_neighb, y_neighb)
+                if with_destroyed_walls:
+                    for c in neighb_cell:          
+                        if d == c:
+                            neighbor_cells.append([c, neighbor_cell])
+                else:
+                    if neighbor_cell.is_closed():
+                        neighbor_cells.append([d, neighbor_cell])
+        return neighbor_cells
     
     
-    def cell_has_neighboor(self, cell):
+    def cell_has_neighbors(self, cell):
         """
         :param cell: a cell in the maze
-        :return: check if the cell has the neighboor or not,
-                 - return True if the cell really has at least one neighboor.
-                 - return False if the cell has any neighboor to be visited.
-                 - a special case : * True if the coordinate of cell is (0,0), 
-                                    * True if the coordinate of the cell is the last cell in th maze.
+        :return: check if the cell has at least one neighboor or not,
         :rtype: (bool)
         :CU: none
-        
-        :Example:
-        >>> game = Maze(4, 4)
-        >>> game.generate_maze()
-        >>> cell = game.get_random_cell()
-        >>> game.cell_has_neighboor(cell)
-        True
         """
-        x = self.get_width()
-        y = self.get_height()
-        cell_depart = self.get_cell_at_coordinates(0, 0)
-        cell_arriver = self.get_cell_at_coordinates(x-1, y-1)
-        liste_neigh = self.get_cell_neighbors(cell)
-        if cell == cell_depart:
+        s, g = self.get_starting_cell(), self.get_goal_cell()
+        neighbors_list = self.get_neighboring_cells(cell, True)
+        if cell == s or cell == g:
             return True
-        if cell == cell_arriver:
-            return True
-        if len(liste_neigh) > 1:
-                return True
-        else:
-            for (d,i) in liste_neigh:
-                if len(liste_neigh) == 1 and (i != cell_depart and i != cell_arriver):
-                    return False
-                else:
-                    return True
+        return True if len(neighbors_list) >= 1 else False
+
                 
     def get_a_random_cell(self, without_starting_cell=False, without_goal_cell=False):
         """ 
-        :param x: x-coordinate of a cell
-        :type x: int
-        :param y: y-coordinate of a cell
-        :type y: int
-        :return: a random cell in the game's grid
-        :type: cell
-        :UC: 0 <= x < width of game and O <= y < height of game
+        :param without_starting_cell: (bool) Set as True to exclude the starting cell. 
+                                             By default set as False.
+        :param without_goal_cell: (bool) Set as True to exclude the goal cell.
+                                         By default set as False.
+        :return: (Cell) a random cell in the game's grid
         """
         w = self.get_width()
         h = self.get_height()
@@ -178,10 +135,10 @@ class Maze():
 
     def make_all_cells_unvisited(self):
         """
-        this function marks all the cells of a labyrinth as invisited cells,
-        each cell of which corresponds to a Boolean value "False".
+        This function marks all the cells of a labyrinth as invisited cells.
+        Each cell corresponds to a boolean value "False".
         :return: returns a dictionary whose keys are the coordinates of the cells of a maze,
-                 and the values ​​associated with each cell are False Boolean values.
+                 and the values ​​associated with each cell are False boolean values.
         :rtype: (dict)
         :CU: none
         """
@@ -196,17 +153,17 @@ class Maze():
         """
         :side effect: this function modifies the initial representation of the labyrinth,
                       since it makes it possible to open the walls of a labyrinth.
-                      ALgorithme : the exhaustive exploration
+                      Algorithm : Depth-first 
         :UC: none
         
         """
         w, h = self.get_width(), self.get_height()
         maze_size = w * h
-        starting_cell:Cell = self.get_a_random_cell(0, 0)
+        starting_cell:Cell = self.get_a_random_cell()
         visited_cell = 1
         l = []
         while visited_cell < maze_size:
-            list_neighboor_cell = self.get_possible_neighboring_cells(starting_cell)
+            list_neighboor_cell = self.get_neighboring_cells(starting_cell, False)
             if not(list_neighboor_cell) :
                 starting_cell = l.pop()
                 continue
@@ -216,67 +173,43 @@ class Maze():
             starting_cell = next_cell
             visited_cell += 1
      
-     
     def find_a_way(self):
         """
         check if there is a path between two points and return a list of the cells that are part of the path
         
-        :return: a List of coordinate of the truth way, which the first element is the first cell in the maze,
+        :return: (list) a List of coordinate of the truth way, which the first element is the first cell in the maze,
                  and the last element on  the list is the last elenment in the maze.
-                 Algorithme: depth first search
-        :rtype: list
+                 Algorithm: Breadth-first search
         """
-        x, y = self.get_width(), self.get_height()
-        solution, trash_stack = Stack(), Stack()
-        
-        solution.push(self.__starting_cell)
-        
-        dic_state = self.make_all_cells_unvisited()
-        dic_state[str(self.__starting_cell)] = True
-        
-        visited_cell = 1
-        while visited_cell < x*y:
-            top_s = solution.top()
-            neighboord_cell_top_s  = self.get_cell_neighbors(top_s)
-            for (_, cell_neigh) in neighboord_cell_top_s:
-                if dic_state[str(cell_neigh)] == False and self.cell_has_neighboor(solution.top()) == True:
-                    solution.push(cell_neigh)
-                    dic_state[str(cell_neigh)] = True
-                elif dic_state[str(cell_neigh)] == True and self.cell_has_neighboor(solution.top()) == False:
-                    trash_stack.push(solution.pop())            
-            if solution.top() == self.get_goal_cell():
-                break
-            visited_cell += 1
-        path = []    
-        while not(solution.is_empty()):
-            cell:Cell = solution.pop()
-            path = path + [cell.get_coordinates()]  
-        path += [self.get_goal_cell()]
-        path.reverse()
+        nums = queue.Queue()
+        start = self.get_starting_cell()
+        nums.put([start])
+        path = [start]
+
+        while not path[-1] == self.get_goal_cell(): 
+            path = nums.get()
+            for d, cell in self.get_neighboring_cells(path[-1], True):
+                put = path + [cell]
+                nums.put(put)
         return path
     
-    def show_maze_after_resoluion(self, 
-                                  resolution_path,
-                                  with_colors=True):
+    def show_maze_after_resoluion(self, resolution_path, with_colors=True):
         width, height = self.get_width(), self.get_height()
         grid = ("+-" * width) + "+"
         for y in range(height):
             mur = "|"
             for x in range(width):
                 symbol = self.__get_cell_symbol(x, y, when_solving=True, with_colors=with_colors)   
-                if (x, y) in resolution_path:
-                    mur = mur + "%s|" %(symbol) if self.get_cell_at_coordinates(x, y).has_right_wall() \
-                                                else mur + "%s%s" %(symbol, (symbol if symbol == PATH_SYMBOL else PATH_SYMBOL))
+                cell = self.get_cell_at_coordinates(x, y)
+                if cell in resolution_path:
+                    mur = mur + "%s|" %(symbol) if cell.has_right_wall() \
+                                                else mur + "%s%s" %(symbol, (symbol if symbol == PATH_SYMBOL else " "))
                 else:
-                    mur = mur + " |" if self.get_cell_at_coordinates(x, y).has_right_wall() else mur + "  " 
+                    mur = mur + " |" if cell.has_right_wall() else mur + "  " 
             grid = grid + "\n" + mur
             mur = '+'
             for x in range(width):
-                
-                if (x, y) in resolution_path:
-                    mur = mur + "-+" if self.get_cell_at_coordinates(x, y).has_bottom_wall() else mur + "%s+" %(PATH_SYMBOL) 
-                else:
-                    mur = mur + "-+" if self.get_cell_at_coordinates(x, y).has_bottom_wall() else mur + " +"
+                mur = mur + "-+" if self.get_cell_at_coordinates(x, y).has_bottom_wall() else mur + " +"
             grid = grid + "\n" + mur
         return grid                      
                           
@@ -414,4 +347,4 @@ class Maze():
                 else:
                     mur = mur + " +" 
             grid = grid + "\n" + mur
-        return grid   
+        return grid

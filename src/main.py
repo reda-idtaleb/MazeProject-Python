@@ -140,8 +140,10 @@ class Main():
                     print(maze)
 
                     resolution_path = maze.find_a_way()
+                    distance = len(resolution_path)
                     self.answer_user("The solution is:", SUCCES_COLOR, new_line_after=False)  
                     self.answer_user(maze.show_maze_after_resoluion(resolution_path), STANDARD_COLOR)
+                    self.answer_user("The length of the path found is: %s" %(distance), SUCCES_COLOR)
                 except FileNotFoundError as e:
                     self.show_stylish_warning(str(e))
                     self.main()
