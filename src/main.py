@@ -25,7 +25,7 @@ class Main():
             return string + ".txt" 
 
     def ask_to_quit(self):
-        answer = input("Do you really want to quit? y/n : ")
+        answer = input("Do you really want to quit? y/n : ").lower()
         print("\n")
         if answer == "y" :
             self.print_ascii_text("Goodbye ! See you again  ; )", color=FRIENDLY_COLOR)
